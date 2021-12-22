@@ -1,0 +1,73 @@
+.MuiDrawer-root .MuiPaper-root {
+    background: rgba(36, 39, 41, 0.1);
+    -webkit-backdrop-filter: blur(40px);
+    backdrop-filter: blur(40px);
+    color: #fff;
+}
+
+.logo {
+    font-size: 26px;
+    margin: 50px auto;
+}
+
+.dapp-nav {
+    width: 100%;
+
+    .dapp-menu-item {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        color: #fff;
+
+        img {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
+.dapp-menu-doc-link {
+    margin-top: auto;
+    width: 100%;
+
+    a {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+
+        img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        p {
+            font-family: Montserrat SemiBold;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 20px;
+            color: #ffffff;
+        }
+    }
+}
+
+.social-row {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+    padding: 1.3rem 0;
+    width: 100%;
+    a {
+        &:hover {
+            transform: scale(1.1);
+        }
+        img {
+            height: 20px;
+            width: 20px;
+        }
+    }
+}
