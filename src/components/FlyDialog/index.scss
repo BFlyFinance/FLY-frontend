@@ -1,0 +1,28 @@
+.MuiDialog-root {
+    .MuiBackdrop-root {
+        backdrop-filter: blur(30px);
+    }
+
+    .MuiDialogTitle-root {
+        text-align: center;
+        justify-content: space-between;
+        position: relative;
+        font-family: Montserrat SemiBold;
+
+        .dialog-close-btn {
+            left: 20px;
+            top: 50%;
+            margin-top: -12px;
+            position: absolute;
+            cursor: pointer;
+        }
+    }
+
+    .MuiPaper-root {
+        max-width: 800px;
+        min-width: 470px;
+        width: 100%;
+        background-color: #181b1c;
+        color: white;
+    }
+}

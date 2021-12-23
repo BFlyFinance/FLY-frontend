@@ -5,15 +5,15 @@ interface IAddresses {
 }
 
 let STC_MAINNET: IAddresses = {};
-Object.keys(process.env).forEach(key => {
-    const addressMatch = key.match(/^REACT_APP_(.*_ADDRESS)$/);
-    if (!addressMatch || addressMatch!.length < 1) return;
+// Object.keys(import.meta).forEach(key => {
+//     const addressMatch = key.match(/^REACT_APP_(.*_ADDRESS)$/);
+//     if (!addressMatch || addressMatch!.length < 1) return;
 
-    const addressName = addressMatch[1];
-    if (addressName) {
-        STC_MAINNET[addressName] = String(process.env[key]);
-    }
-});
+//     const addressName = addressMatch[1];
+//     if (addressName) {
+//         STC_MAINNET[addressName] = String(import.meta[key] as string);
+//     }
+// });
 
 export const getAddresses = (networkID: number) => {
     if (networkID === Networks.STC) return STC_MAINNET;

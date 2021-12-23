@@ -1,0 +1,19 @@
+.state-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Montserrat medium;
+    font-size: 20px;
+    margin-bottom: 2px;
+
+    .state-label__title {
+        color: rgba(#ffffff, 0.6);
+        padding: 10px 0;
+    }
+
+    .state-label__value {
+        font-size: 24px;
+        color: #ffffff;
+        font-family: Montserrat bold;
+    }
+}

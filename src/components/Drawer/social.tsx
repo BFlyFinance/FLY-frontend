@@ -1,8 +1,9 @@
-import { SvgIcon, Link } from "@material-ui/core";
-import GitHub from "../../assets/icons/github.svg";
-import Twitter from "../../assets/icons/twitter.svg";
-import Telegram from "../../assets/icons/telegram.svg";
+import { Link } from "@mui/material";
+
 import Discord from "../../assets/icons/discord.svg";
+import GitHub from "../../assets/icons/github.svg";
+import Telegram from "../../assets/icons/telegram.svg";
+import Twitter from "../../assets/icons/twitter.svg";
 
 export default function Social() {
     return (

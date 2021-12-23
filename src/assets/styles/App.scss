@@ -3,5 +3,122 @@
 
     .main {
         width: 100%;
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            min-height: 300px;
+
+            background-color: rgba(36, 39, 41, 0.1);
+            backdrop-filter: blur(40px);
+            border-radius: 4px;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            font-family: Montserrat SemiBold;
+
+            h1 {
+                flex-shrink: 0;
+                justify-content: flex-start;
+                padding-left: 50px;
+            }
+
+            .body {
+                display: flex;
+                justify-content: space-evenly;
+            }
+        }
+    }
+
+    .content {
+        padding: 20px;
+        transition: margin 0.2s ease;
+        margin-left: 280px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-shift {
+        transition: margin 0.2s ease-in-out;
+        margin-left: 0;
+    }
+}
+
+.text-field {
+    color: #fff;
+}
+
+.panel-table {
+    box-sizing: border-box;
+
+    .MuiTableCell-root {
+        color: white;
+        text-align: center;
+        font-size: 16px;
+        font-family: Montserrat Bold;
+        border: none;
+    }
+
+    .MuiTableHead-root {
+        .MuiTableCell-root {
+            font-family: Montserrat;
+        }
+    }
+}
+
+.MuiInputBase-root {
+    background: hsla(0, 0%, 100%, 0.2);
+    border: 1px solid hsla(0, 0%, 100%, 0.2);
+    border-radius: 10px;
+    outline: none;
+    margin-bottom: 20px;
+
+    .MuiOutlinedInput-notchedOutline {
+        border: 0;
+    }
+
+    .MuiOutlinedInput-input {
+        font-family: Montserrat Medium;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        color: hsla(0, 0%, 100%, 0.6);
+    }
+
+    .max-btn {
+        font-family: Montserrat SemiBold;
+        font-weight: 600;
+        font-size: 18px;
+        color: #fff;
+        cursor: pointer;
+    }
+}
+
+.dialog-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+
+    .MuiTab-root {
+        color: rgba($color: #ffffff, $alpha: 0.5);
+        font-size: 18px;
+        font-family: Montserrat Bold;
+        min-width: 200px;
+    }
+
+    .dialog-form {
+        display: flex;
+        flex-direction: column;
+        // background-color: red;
+        max-width: 600px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .dialog-data {
+        margin: 10px 0 0;
+        width: 100%;
     }
 }

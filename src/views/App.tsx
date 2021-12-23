@@ -5,43 +5,18 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { makeStyles, useMediaQuery } from "@material-ui/core";
+import { useMediaQuery } from "@mui/material";
 
 import Drawer from "../components/Drawer";
 import Header from "../components/Header";
 import Loader from "../components/Loader/index";
-import { DRAWER_WIDTH, TRANSITION_DURATION } from "../constants/style";
-import { getOracle, iAppSlice } from "../store/slices/app-slice";
+import { getOracle, iAppSlice, setMarketIndex, getFlyTokenPrice } from "../store/slices/app-slice";
 import { iReduxState } from "../store/slices/state.interface";
+import { getMarketIndex } from "../utils/service";
 import Bond from "./Bond";
 import Stake from "./Stake";
 
-const useStyles = makeStyles(theme => ({
-    content: {
-        padding: theme.spacing(1),
-        transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.sharp,
-            duration: TRANSITION_DURATION,
-        }),
-        marginLeft: DRAWER_WIDTH,
-        display: "flex",
-        justifyContent: "center",
-    },
-    contentShift: {
-        transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.easeOut,
-            duration: TRANSITION_DURATION,
-        }),
-        marginLeft: 0,
-    },
-}));
-
-interface ITokenPriceArray {
-    [key: string]: string;
-}
-
 function App() {
-    const classes = useStyles();
     const dispatch = useDispatch();
 
     const appInfo = useSelector<iReduxState, iAppSlice>(state => state.app);
@@ -69,7 +44,17 @@ function App() {
             window.location.reload();
         });
 
+        // Get Token Price
         dispatch(getOracle());
+        dispatch(getFlyTokenPrice());
+
+        const init = async () => {
+            const result = await getMarketIndex();
+            // dispatch MarketIndex
+            dispatch(setMarketIndex(result[0]));
+        };
+
+        init();
 
         return () => {
             window.starcoin.removeAllListeners();
@@ -85,7 +70,7 @@ function App() {
                     <Drawer mobileOpen={mobileOpen} isSmallerScreen={isSmallerScreen} handleDrawerToggle={handleDrawerToggle}></Drawer>
                     <div className="main">
                         <Header handleDrawerToggle={handleDrawerToggle} drawe={!isSmallerScreen}></Header>
-                        <div className={`${classes.content} ${isSmallerScreen && classes.contentShift}`}>
+                        <div className={`content ${isSmallerScreen && "content-shift"}`}>
                             <Routes>
                                 <Route path="/" element={<Navigate to="/stake" />}></Route>
                                 <Route path="/stake" element={<Stake />}></Route>

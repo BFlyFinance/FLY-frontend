@@ -9,4 +9,7 @@ export default defineConfig({
         port: 4000,
         host: "0.0.0.0",
     },
+    build: {
+        target: ["esnext"],
+    },
 });

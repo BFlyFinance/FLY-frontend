@@ -1,37 +1,15 @@
-import { useState } from "react";
-import { Drawer, Link, makeStyles } from "@material-ui/core";
-import { NavLink } from "react-router-dom";
-import { DRAWER_WIDTH } from "../../constants/style";
-import classNames from "classnames";
-
-import StakeIcon from "../../assets/icons/stake.svg";
-import BondIcon from "../../assets/icons/bond.svg";
-import DocsIcon from "../../assets/icons/stake.svg";
-
 import "./index.scss";
-import Social from "./social";
 
-const useStyle = makeStyles(theme => ({
-    drawer: {
-        display: "flex",
-        alignItems: "center",
-        flexDirection: "column",
-        width: DRAWER_WIDTH,
-        height: "100%",
-        flexShrink: 0,
-        padding: 20,
-        fontFamily: "Montserrat SemiBold",
-        boxSizing: "border-box",
-        [theme.breakpoints.up("sm")]: {
-            width: DRAWER_WIDTH,
-            flexShrink: 0,
-            display: "flex",
-        },
-    },
-    drawerPaper: {
-        borderRight: 0,
-    },
-}));
+import classNames from "classnames";
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
+
+import { Article } from "@mui/icons-material";
+import { Drawer, Link } from "@mui/material";
+
+import BondIcon from "../../assets/icons/bond.svg";
+import StakeIcon from "../../assets/icons/stake.svg";
+import Social from "./social";
 
 interface INavDrawer {
     mobileOpen: boolean;
@@ -40,7 +18,6 @@ interface INavDrawer {
 }
 
 export default ({ mobileOpen, isSmallerScreen, handleDrawerToggle }: INavDrawer) => {
-    const classes = useStyle();
     const [isActive] = useState();
 
     return (
@@ -51,13 +28,13 @@ export default ({ mobileOpen, isSmallerScreen, handleDrawerToggle }: INavDrawer)
             onClose={handleDrawerToggle}
             onClick={handleDrawerToggle}
             classes={{
-                paper: classes.drawerPaper,
+                paper: "drawer-paper",
             }}
             ModalProps={{
                 keepMounted: true,
             }}
         >
-            <div className={classes.drawer}>
+            <div className="drawer">
                 <div className="logo">FLY Defi</div>
                 <div className="dapp-nav">
                     <Link component={NavLink} to="/stake" className={classNames("button-dapp-menu", { active: isActive })}>
@@ -74,8 +51,8 @@ export default ({ mobileOpen, isSmallerScreen, handleDrawerToggle }: INavDrawer)
                     </Link>
                 </div>
                 <div className="dapp-menu-doc-link">
-                    <Link href="https://wonderland.gitbook.io/wonderland/" target="_blank">
-                        <img alt="" src={DocsIcon} />
+                    <Link href="https://wonderland.gitbook.io/wonderland/" target="_blank" className="doc-link">
+                        <Article htmlColor="#fff"></Article>
                         <p>Docs</p>
                     </Link>
                     {/* <Link href="https://legacy.wonderland.money/" target="_blank">
