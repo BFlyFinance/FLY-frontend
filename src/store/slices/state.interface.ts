@@ -1,7 +1,7 @@
-import { IAccountSlice } from "./account-slice";
+import { iAccountSlice } from "./account-slice";
 import { iAppSlice } from "./app-slice";
 
 export interface iReduxState {
-    account: IAccountSlice;
+    account: iAccountSlice;
     app: iAppSlice;
 }
