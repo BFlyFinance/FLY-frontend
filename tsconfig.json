@@ -4,7 +4,7 @@
         "useDefineForClassFields": true,
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "allowJs": false,
-        "skipLibCheck": false,
+        "skipLibCheck": true,
         "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
         "strict": true,
@@ -15,8 +15,9 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "noImplicitAny": true
     },
     "include": ["./src"],
-    "exclude": ["node_modules"]
+    "exclude": ["**/*.test.ts", "**/*.test.tsx", "node_modules", "vendor", "public", "dist"]
 }

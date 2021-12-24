@@ -42,7 +42,7 @@ const initialState: iAppSlice = {
 
 export const getOracle = createAsyncThunk("app/getOracle", async () => {
     try {
-        const res = await axios.get(`https://price-api.starcoin.org/${CHAIN_NAME["251"]}/v1/priceFeeds`);
+        const res = await axios.get(`https://price-api.starcoin.org/${CHAIN_NAME[251]}/v1/priceFeeds`);
         const result: TokenPrice = {};
 
         res.data

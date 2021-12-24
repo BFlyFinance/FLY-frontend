@@ -35,7 +35,7 @@ export const ROI = ({ bondPrice, tokenPrice }: ROIParams) => {
     return new BigNumber(1).minus(new BigNumber(bondPrice).dividedBy(tokenPrice)).multipliedBy(100).valueOf() + "%";
 };
 
-export const enum CHAIN_NAME {
+export enum CHAIN_NAME {
     main = 1,
     barnard = 251,
     proxima = 252,
@@ -48,7 +48,7 @@ export const TOKEN_STC = `0x1::STC::STC`;
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${CONTRACT_ADDRESS}::TokenMock::FAI, ${CONTRACT_ADDRESS}::FLY::FLY>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${CONTRACT_ADDRESS}::FLY::FLY>`;
 
-export const chainRpc = () => `https://${CHAIN_NAME["252"]}-seed.starcoin.org/`;
+export const chainRpc = () => `https://${CHAIN_NAME[252]}-seed.starcoin.org/`;
 
 export const requestChain = async (method: string, params: any) =>
     await axios.post(chainRpc(), {

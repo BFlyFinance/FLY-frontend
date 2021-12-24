@@ -4,7 +4,7 @@ import { providers, utils, bcs } from "@starcoin/starcoin";
 let starcoinProvider: any;
 let jsonProvider: any;
 
-const enum PROVIDER_URL_MAP {
+enum PROVIDER_URL_MAP {
     "https://main-seed.starcoin.org" = 1,
     "https://barnard-seed.starcoin.org" = 251,
     "https://proxima-seed.starcoin.org" = 252,
@@ -13,7 +13,7 @@ const enum PROVIDER_URL_MAP {
 
 if (window.starcoin) {
     starcoinProvider = new providers.Web3Provider(window.starcoin, "any");
-    jsonProvider = (url: string) => new providers.JsonRpcProvider(url || PROVIDER_URL_MAP["252"]);
+    jsonProvider = (url: string) => new providers.JsonRpcProvider(url || PROVIDER_URL_MAP[252]);
 } else {
     console.error("[TxnWrapper] Has no window.starcoin! Maybe Install the starmask!");
 }
