@@ -9,7 +9,26 @@ export default defineConfig({
         port: 4000,
         host: "0.0.0.0",
     },
+    resolve: {
+        alias: {
+            process: "process/browser",
+            stream: "stream-browserify",
+            zlib: "browserify-zlib",
+            util: "util",
+        },
+    },
+
     build: {
+        // transform commonjs modules to es6 modules
+        commonjsOptions: {
+            transformMixedEsModules: true,
+        },
+        // pack all js files into one
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
         target: ["esnext"],
     },
 });
