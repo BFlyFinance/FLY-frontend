@@ -1,16 +1,19 @@
 import "./index.scss";
 
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 
-export interface iBondDialogData {
+import { iBondData } from "../../utils/service";
+
+export interface iBondDialogData extends iBondData {
     title: string;
 }
 
 export interface iBondDialogProps {
     open: boolean;
+    hideClose?: boolean;
     dialogData?: iBondDialogData;
     onClose: () => void;
 }
@@ -36,10 +39,16 @@ const FlyDialog = (
         onClose: () => {},
     },
 ) => {
+    const onClose = useCallback(() => {
+        if (!props.hideClose) {
+            props.onClose();
+        }
+    }, [props.onClose, props.hideClose]);
+
     return (
-        <Dialog open={props.open} onBackdropClick={props.onClose}>
+        <Dialog open={props.open} onBackdropClick={onClose}>
             <DialogTitle>
-                <CloseIcon className="dialog-close-btn" onClick={props.onClose}></CloseIcon>
+                {props.hideClose ? null : <CloseIcon className="dialog-close-btn" onClick={onClose}></CloseIcon>}
                 {props?.dialogData?.title}
             </DialogTitle>
             <DialogContent>{props.children}</DialogContent>

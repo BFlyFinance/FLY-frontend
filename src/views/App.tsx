@@ -10,7 +10,7 @@ import { useMediaQuery } from "@mui/material";
 import Drawer from "../components/Drawer";
 import Header from "../components/Header";
 import Loader from "../components/Loader/index";
-import { getOracle, iAppSlice, setMarketIndex, getFlyTokenPrice } from "../store/slices/app-slice";
+import { getTokenPrecision, getOracle, iAppSlice, setMarketIndex } from "../store/slices/app-slice";
 import { iReduxState } from "../store/slices/state.interface";
 import { getMarketIndex } from "../utils/service";
 import Bond from "./Bond";
@@ -46,7 +46,7 @@ function App() {
 
         // Get Token Price
         dispatch(getOracle());
-        dispatch(getFlyTokenPrice());
+        dispatch(getTokenPrecision());
 
         const init = async () => {
             const result = await getMarketIndex();

@@ -50,7 +50,7 @@ const accountSlice = createSlice({
         emptyAddress(state: iAccountSlice) {
             state.address = "";
             state.short_address = "";
-            window.localStorage.removeItem(WALLET_LS_KEY);
+            // window.localStorage.removeItem(WALLET_LS_KEY);
             return state;
         },
     },

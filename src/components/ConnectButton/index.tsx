@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { Button } from "@mui/material";
+
 import { emptyAddress, getAccountFromWallet, getAccountStakedAndBond, iAccountSlice, WALLET_LS_KEY } from "../../store/slices/account-slice";
 import { iReduxState } from "../../store/slices/state.interface";
+import { CustomButton } from "../../constants/assets/button";
 
 const DEFAULT_BUTTON_TEXT = "Connect Wallet";
 
@@ -12,14 +15,18 @@ const ConnectButton = () => {
 
     const [buttonText, setButtonText] = useState(DEFAULT_BUTTON_TEXT);
 
-    const connect = useCallback(() => {
-        if (account.loading) return;
-        if (!account.short_address) {
-            dispatch(getAccountFromWallet());
-        } else {
-            dispatch(emptyAddress());
-        }
-    }, [account]);
+    const connect = useCallback(
+        (init: boolean = false) => {
+            if (account.loading) return;
+
+            if (!account.short_address || init) {
+                dispatch(getAccountFromWallet());
+            } else {
+                // dispatch(emptyAddress());
+            }
+        },
+        [account],
+    );
 
     const getAccountStakedInfo = useCallback(async () => {
         if (account.address) {
@@ -30,7 +37,7 @@ const ConnectButton = () => {
     // first Init
     useEffect(() => {
         if (window.localStorage.getItem(WALLET_LS_KEY)) {
-            connect();
+            connect(true);
         }
         getAccountStakedInfo();
     }, []);
@@ -41,9 +48,9 @@ const ConnectButton = () => {
     }, [account]);
 
     return (
-        <div className="button" onClick={connect}>
+        <Button sx={CustomButton} onClick={() => connect()}>
             {buttonText}
-        </div>
+        </Button>
     );
 };
 
