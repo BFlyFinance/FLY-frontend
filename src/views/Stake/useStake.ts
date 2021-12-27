@@ -1,24 +1,55 @@
-import { useState, useCallback } from "react";
-import { stakeService, GetTransactionStatus } from "../../utils/service";
+import BigNumber from "bignumber.js";
 import { useSnackbar } from "notistack";
-import { useSelector } from "react-redux";
-import { iReduxState } from "../../store/slices/state.interface";
+import { useCallback, useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
 import { iAppSlice } from "../../store/slices/app-slice";
+import { iReduxState } from "../../store/slices/state.interface";
+import { ToHumanAmount } from "../../utils/index";
+import { GetTransactionStatus, getUserFLYBalance, stakeService } from "../../utils/service";
+import { iAccountSlice, getAccountStakedAndBond } from "../../store/slices/account-slice";
 
 export default () => {
     const appInfo = useSelector<iReduxState, iAppSlice>(state => state.app);
+    const account = useSelector<iReduxState, iAccountSlice>(state => state.account);
+    const dispatch = useDispatch();
 
     const [stakeLoading, setStakeLoading] = useState(false);
     const [stakeAmount, setStakeAmount] = useState<number | string>("");
+    const [balance, setBalance] = useState("0");
+    const [stakedBalance, setStakedBalance] = useState("0");
+
     const { enqueueSnackbar } = useSnackbar();
 
+    useEffect(() => {
+        if (account.address) {
+            (async () => {
+                const balance = await getUserFLYBalance(account.address);
+                setBalance(ToHumanAmount(balance, appInfo?.tokenPrecision["fly"]?.scale).valueOf());
+            })();
+
+            console.log("account.stakedDetail?.warmup_amount", account?.stakedDetail?.warmup_amount, "account.stakedDetail?.amount", account.stakedDetail?.amount);
+
+            setStakedBalance(
+                ToHumanAmount(
+                    new BigNumber(account?.stakedDetail?.warmup_amount || 0).plus(account.stakedDetail?.amount || 0).toNumber(),
+                    appInfo.tokenPrecision["fly"]?.scale,
+                ).toString(),
+            );
+        }
+    }, [account.address, appInfo.tokenPrecision]);
+
     const setMaxAmount = useCallback(() => {
-        setStakeAmount(102);
-    }, []);
+        setStakeAmount(balance);
+    }, [balance]);
+
+    const setUnStakeMaxAmount = useCallback(() => {
+        setStakeAmount(stakedBalance);
+    }, [stakedBalance]);
 
     const stakeToken = async (name: string) => {
         try {
-            if (stakeAmount !== 0) {
+            if (stakeAmount !== 0 && stakeAmount !== "") {
                 setStakeLoading(true);
 
                 const tokenName = name.toLocaleLowerCase();
@@ -32,6 +63,8 @@ export default () => {
                     enqueueSnackbar(`${txn} Transaction Faild!`, { variant: "error" });
                 }
                 setStakeLoading(false);
+                // update account info
+                dispatch(getAccountStakedAndBond(account.address));
             } else {
                 enqueueSnackbar("Please enter amount", { variant: "error" });
             }
@@ -42,10 +75,13 @@ export default () => {
     };
 
     return {
+        balance,
         stakeLoading,
         stakeAmount,
+        stakedBalance,
         stakeToken,
         setStakeAmount,
+        setUnStakeMaxAmount,
         setMaxAmount,
     };
 };

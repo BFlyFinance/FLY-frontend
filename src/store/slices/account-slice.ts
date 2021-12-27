@@ -1,15 +1,34 @@
 import { ActionReducerMapBuilder, createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 
 import { shortCutOfAccountHash } from "../../utils/index";
-import { RootState } from "../index";
 import { getUserStakedAndBond } from "../../utils/service";
+import { RootState } from "../index";
+
+export interface iStakeDetail {
+    amount: number;
+    index: number;
+    index_last_update: number;
+    warmup_amount: number;
+    warmup_expires: number;
+}
+
+export interface iBondDetail {
+    last_time: number;
+    payout: number;
+    price_paid: number;
+    start_time: number;
+    token: {
+        [key: string]: any;
+    };
+    vesting: number;
+}
 
 export interface iAccountSlice {
     loading: boolean;
     address: string;
     short_address: string;
-    stakedDetail: any;
-    bondDetail: any;
+    stakedDetail: iStakeDetail;
+    bondDetail: iBondDetail;
     bondReleasedDetail: any;
 }
 
@@ -17,9 +36,9 @@ const initialState: iAccountSlice = {
     loading: false,
     address: "",
     short_address: "",
-    stakedDetail: null,
-    bondDetail: null,
-    bondReleasedDetail: null,
+    stakedDetail: {} as iStakeDetail,
+    bondDetail: {} as iBondDetail,
+    bondReleasedDetail: {},
 };
 
 export const getAccountFromWallet = createAsyncThunk("account/getAccountFromWallet", async () => {
@@ -57,8 +76,8 @@ const accountSlice = createSlice({
     extraReducers: (builder: ActionReducerMapBuilder<iAccountSlice>) => {
         builder
             // getAccountFromWallet
-            .addCase(getAccountFromWallet.pending, (state, actions) => {
-                state.loading = false;
+            .addCase(getAccountFromWallet.pending, state => {
+                state.loading = true;
             })
             .addCase(getAccountFromWallet.rejected, (state, actions) => {
                 state.loading = false;
@@ -70,12 +89,15 @@ const accountSlice = createSlice({
                 state.short_address = shortCutOfAccountHash(state.address);
                 window.localStorage.setItem(WALLET_LS_KEY, "1");
             })
-            // getAccountStaked
+            .addCase(getAccountStakedAndBond.pending, state => {
+                state.loading = true;
+            })
+            .addCase(getAccountStakedAndBond.rejected, state => {
+                state.loading = false;
+            })
             .addCase(getAccountStakedAndBond.fulfilled, (state, actions) => {
-                state = {
-                    ...state,
-                    ...(actions.payload as {}),
-                };
+                state.loading = false;
+                Object.assign(state, actions.payload as {});
             });
     },
 });

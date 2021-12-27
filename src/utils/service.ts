@@ -1,5 +1,6 @@
-import { CONTRACT_ADDRESS, requestChain, chainRpc, ToChainAmount } from "./index";
+import { CONTRACT_ADDRESS, requestChain, chainRpc, ToChainAmount, resultDesc, KEY_Balance, TOKEN_FLY, ToHumanAmount } from "./index";
 import TxnWrapper, { JsonProvider } from "./TxnWrapper";
+import { iStakeDetail, iBondDetail } from "../store/slices/account-slice";
 
 export const GetTransactionStatus = (txHash: string) => {
     return JsonProvider(chainRpc()).getTransactionInfo(txHash);
@@ -24,19 +25,33 @@ export const getMarketIndex = async () => {
 };
 
 // ========================================================
+// Use FLY Balance
+// ========================================================
+export const getUserFLYBalance = async (address: string) => {
+    try {
+        const result = await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FLY), { decode: true }]);
+
+        return result?.data?.result?.json?.token?.value;
+    } catch (e) {
+        return e;
+    }
+};
+
+// ========================================================
 // User Staked
 // ========================================================
 export const getUserStakedAndBond = async (address: string) => {
     try {
-        const stakedResult = await requestChain("contract.get_resource", [address, `${CONTRACT_ADDRESS}::Stake::SFLY`]);
-        const bondResult = await requestChain("contract.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<0x00000000000000000000000000000001::STC::STC>`]);
-        const bondReleasedRate = await requestChain("contract.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::ReleasedRate`]);
+        const stakedDetail = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Stake::SFLY`, { decode: true }])) as iStakeDetail;
+        const bondDetail = resultDesc(
+            await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<0x00000000000000000000000000000001::STC::STC>`, { decode: true }]),
+        ) as iBondDetail;
+        const bondReleasedDetail = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::ReleasedRate`, { decode: true }]));
 
-        //TODO: 等有数据了这里要改成数据结构解析
         return {
-            stakedDetail: {},
-            bondDetail: {},
-            bondReleasedDetail: {},
+            stakedDetail,
+            bondDetail,
+            bondReleasedDetail,
         };
     } catch (e) {
         return e;

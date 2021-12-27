@@ -10,9 +10,11 @@
         </script>
         <script type="module">
             import { Buffer } from "buffer";
+            import process from "process";
             import EventEmitter from "events";
 
             window.Buffer = Buffer;
+            window.process = process;
             window.EventEmitter = EventEmitter;
         </script>
     </head>

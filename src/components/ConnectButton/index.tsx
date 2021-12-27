@@ -32,7 +32,7 @@ const ConnectButton = () => {
         if (account.address) {
             dispatch(getAccountStakedAndBond(account.address));
         }
-    }, [account]);
+    }, [account.address]);
 
     // first Init
     useEffect(() => {
@@ -45,7 +45,7 @@ const ConnectButton = () => {
     useEffect(() => {
         setButtonText(account.short_address || DEFAULT_BUTTON_TEXT);
         getAccountStakedInfo();
-    }, [account]);
+    }, [account.short_address]);
 
     return (
         <Button sx={CustomButton} onClick={() => connect()}>

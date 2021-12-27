@@ -43,7 +43,7 @@ export enum CHAIN_NAME {
 
 export const CONTRACT_ADDRESS = "0xc137657e5aed5099592ba07c8ab44cc5".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
-export const TOEKN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
+export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${CONTRACT_ADDRESS}::TokenMock::FAI, ${CONTRACT_ADDRESS}::FLY::FLY>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${CONTRACT_ADDRESS}::FLY::FLY>`;
@@ -57,6 +57,10 @@ export const requestChain = async (method: string, params: any) =>
         method,
         params,
     });
+
+export const resultDesc = (result: any) => {
+    return result?.data?.result?.json || {};
+};
 
 export const KEY_Balance = (token: string) => `0x00000000000000000000000000000001::Account::Balance<${token}>`;
 export const ToChainAmount = (amount: number, precision: number = Math.pow(10, 9)) => new BigNumber(amount).multipliedBy(precision);

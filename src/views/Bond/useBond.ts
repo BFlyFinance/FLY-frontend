@@ -14,7 +14,7 @@ export default () => {
 
     const buyBond = async ({ tokenAddress, max_price = 0, name }: iBondDialogData) => {
         try {
-            if (bondAmount !== 0) {
+            if (bondAmount !== 0 && bondAmount !== "") {
                 setBondLoading(true);
                 const tokenName = name.toLocaleLowerCase();
 

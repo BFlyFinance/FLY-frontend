@@ -4,7 +4,7 @@ import BigNumber from "bignumber.js";
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 
 import { CHAIN_NAME } from "../../utils";
-import { requestChain, TOEKN_FLY, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
+import { requestChain, TOKEN_FLY, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
 import { RootState } from "../index";
 
 export interface TokenPrice {
@@ -30,11 +30,11 @@ const initialState: iAppSlice = {
     marketIndex: null,
     tokenPrecision: {
         fly: {
-            scale: 100000000,
+            scale: 1000000000,
             percision: 9,
         },
         stc: {
-            scale: 100000000,
+            scale: 1000000000,
             percision: 9,
         },
     },
@@ -65,7 +65,7 @@ interface TokenPriceMap {
 
 export const getTokenPrecision = createAsyncThunk("app/getTokenPrecision", async () => {
     try {
-        const flyResult = await requestChain("contract.call_v2", [{ function_id: "0x1::Token::scaling_factor", type_args: [TOEKN_FLY], args: [] }]);
+        const flyResult = await requestChain("contract.call_v2", [{ function_id: "0x1::Token::scaling_factor", type_args: [TOKEN_FLY], args: [] }]);
         const stcResult = await requestChain("contract.call_v2", [{ function_id: "0x1::Token::scaling_factor", type_args: [TOKEN_STC], args: [] }]);
         const flyFaiResult = await requestChain("contract.call_v2", [
             {

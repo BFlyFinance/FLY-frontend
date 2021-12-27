@@ -1,9 +1,9 @@
 import "./index.scss";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { Grid, useMediaQuery, Tabs, Tab, OutlinedInput, InputAdornment } from "@mui/material";
+import { Grid, useMediaQuery, Tabs, Tab, OutlinedInput, InputAdornment, Skeleton } from "@mui/material";
 
 import Statelabel from "../../components/StateLabel/index";
 import { iAccountSlice } from "../../store/slices/account-slice";
@@ -21,22 +21,18 @@ enum eStakeTab {
 
 export default () => {
     const [loading, setLoading] = useState(false);
-    const account = useSelector<iReduxState, iAccountSlice>(state => state.account);
+    const [tabValue, setTabValue] = useState(eStakeTab.stake);
 
     const isSmallScreen = useMediaQuery(MEDIA_QUERY);
-    const { stakeLoading, stakeAmount, stakeToken, setStakeAmount, setMaxAmount } = useStake();
-    const [tabValue, setTabValue] = useState(eStakeTab.stake);
+    const { stakeLoading, stakeAmount, stakeToken, setStakeAmount, setMaxAmount, setUnStakeMaxAmount, balance, stakedBalance } = useStake();
 
     const onTabChanged = useCallback((event: React.SyntheticEvent, newValue: eStakeTab) => {
         setTabValue(newValue as eStakeTab);
     }, []);
 
-    const stake = useCallback(async () => {
-        setLoading(true);
-        try {
-        } catch (e) {}
-        setLoading(false);
-    }, []);
+    useEffect(() => {
+        setStakeAmount(0);
+    }, [tabValue]);
 
     return (
         <div className="panel stake">
@@ -62,7 +58,7 @@ export default () => {
                         value={stakeAmount}
                         endAdornment={
                             <InputAdornment position="end">
-                                <span className="max-btn" onClick={setMaxAmount}>
+                                <span className="max-btn" onClick={() => (tabValue === eStakeTab.stake ? setMaxAmount() : setUnStakeMaxAmount())}>
                                     MAX
                                 </span>
                             </InputAdornment>
@@ -75,8 +71,8 @@ export default () => {
                     </LoadingButton>
                 </div>
                 <div className="dialog-data">
-                    <DataRow title="Your Balance" value="100"></DataRow>
-                    <DataRow title="Staked Balance" value="100"></DataRow>
+                    <DataRow title="Your Balance" value={`$${balance}`}></DataRow>
+                    <DataRow title="Staked Balance" value={`$${stakedBalance}`}></DataRow>
                     <DataRow title="ROI (5-Day Rate)" value="ROI"></DataRow>
                 </div>
             </div>
