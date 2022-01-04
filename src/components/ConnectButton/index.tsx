@@ -1,11 +1,10 @@
+import { WALLET_LS_KEY, emptyAddress, getAccountFromWallet, getAccountStakedAndBond, iAccountSlice } from "../../store/slices/account-slice";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@mui/material";
-
-import { emptyAddress, getAccountFromWallet, getAccountStakedAndBond, iAccountSlice, WALLET_LS_KEY } from "../../store/slices/account-slice";
-import { iReduxState } from "../../store/slices/state.interface";
 import { CustomButton } from "../../constants/assets/button";
+import { iReduxState } from "../../store/slices/state.interface";
 
 const DEFAULT_BUTTON_TEXT = "Connect Wallet";
 

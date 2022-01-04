@@ -20,9 +20,12 @@
 
     .MuiPaper-root {
         max-width: 800px;
-        min-width: 470px;
+        min-width: 375px;
         width: 100%;
         background-color: #181b1c;
         color: white;
+        .MuiDialogContent-root {
+            overflow: hidden;
+        }
     }
 }

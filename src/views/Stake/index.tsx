@@ -1,18 +1,15 @@
 import "./index.scss";
 
-import { useCallback, useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { Grid, InputAdornment, OutlinedInput, Skeleton, Tab, Tabs, useMediaQuery } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
-import { Grid, useMediaQuery, Tabs, Tab, OutlinedInput, InputAdornment, Skeleton } from "@mui/material";
-
-import Statelabel from "../../components/StateLabel/index";
-import { iAccountSlice } from "../../store/slices/account-slice";
-import { iReduxState } from "../../store/slices/state.interface";
-import { MEDIA_QUERY } from "../../constants/index";
 import { CustomButton } from "../../constants/assets/button";
-import useStake from "./useStake";
 import DataRow from "../../components/DataRow/index";
 import { LoadingButton } from "@mui/lab";
+import { MEDIA_QUERY } from "../../constants/index";
+import Statelabel from "../../components/StateLabel/index";
+import useStake from "./useStake";
+import numeral from "numeral";
 
 enum eStakeTab {
     stake = "stake",
@@ -24,10 +21,28 @@ export default () => {
     const [tabValue, setTabValue] = useState(eStakeTab.stake);
 
     const isSmallScreen = useMediaQuery(MEDIA_QUERY);
-    const { stakeLoading, stakeAmount, stakeToken, setStakeAmount, setMaxAmount, setUnStakeMaxAmount, balance, stakedBalance } = useStake();
+    const {
+        stakeLoading,
+        stakeAmount,
+        balance,
+        stakedBalance,
+        stakedROI5days,
+        apy,
+        tvl,
+        stakeToken,
+        unStakeToken,
+        setStakeAmount,
+        setMaxAmount,
+        setUnStakeMaxAmount,
+        setStakedROI5days,
+    } = useStake();
 
     const onTabChanged = useCallback((event: React.SyntheticEvent, newValue: eStakeTab) => {
         setTabValue(newValue as eStakeTab);
+    }, []);
+
+    const inputChangeHandler = useCallback(value => {
+        setStakeAmount(value.replace(/^0(\d)/, "$1"));
     }, []);
 
     useEffect(() => {
@@ -39,10 +54,10 @@ export default () => {
             <h1>Stake (3, 3) </h1>
             <Grid container spacing={2} className="stat-container">
                 <Grid item xs={12} sm={6} className="stat">
-                    <Statelabel title={"APY"} value={"6231.1%"}></Statelabel>
+                    <Statelabel title={"APY"} value={`${apy}%`}></Statelabel>
                 </Grid>
                 <Grid item xs={12} sm={6} className="stat">
-                    <Statelabel title={"Total Value Deposited"} value={"$1,856,249"}></Statelabel>
+                    <Statelabel title={"Total Value Deposited"} value={`$${numeral(tvl).format("0,0")}`}></Statelabel>
                 </Grid>
             </Grid>
             <div className="dialog-body">
@@ -63,17 +78,23 @@ export default () => {
                                 </span>
                             </InputAdornment>
                         }
-                        onChange={el => setStakeAmount(Number(el.target.value))}
+                        onChange={el => inputChangeHandler(el.target.value)}
                         autoFocus
                     />
-                    <LoadingButton sx={CustomButton} loading={stakeLoading} variant="contained" color="primary" onClick={() => stakeToken("fly")}>
+                    <LoadingButton
+                        sx={CustomButton}
+                        loading={stakeLoading}
+                        variant="contained"
+                        color="primary"
+                        onClick={() => (tabValue === eStakeTab.stake ? stakeToken("fly") : unStakeToken("fly"))}
+                    >
                         {tabValue}
                     </LoadingButton>
                 </div>
                 <div className="dialog-data">
                     <DataRow title="Your Balance" value={`$${balance}`}></DataRow>
                     <DataRow title="Staked Balance" value={`$${stakedBalance}`}></DataRow>
-                    <DataRow title="ROI (5-Day Rate)" value="ROI"></DataRow>
+                    <DataRow title="ROI (5-Day Rate)" value={`${stakedROI5days}%`}></DataRow>
                 </div>
             </div>
         </div>

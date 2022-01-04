@@ -1,23 +1,23 @@
 import "./index.scss";
 
+import { CustomButton, CustomButtonSmall } from "../../constants/assets/button";
+import FlyDialog, { iBondDialogData, useDialog } from "../../components/FlyDialog/index";
+import { Grid, InputAdornment, OutlinedInput, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, useMediaQuery, Card, CardContent } from "@mui/material";
+import { ROI, prettifySeconds, ToHumanAmount } from "../../utils/index";
+import { getBondList, iBondData, getAssetPool, iAssetPoolData } from "../../utils/service";
 import { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-
-import { LoadingButton } from "@mui/lab";
-import { Grid, InputAdornment, OutlinedInput, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, useMediaQuery } from "@mui/material";
 
 import DataRow from "../../components/DataRow/index";
-import FlyDialog, { iBondDialogData, useDialog } from "../../components/FlyDialog/index";
-import Statelabel from "../../components/StateLabel";
+import Loader from "../../components/Loader";
+import { LoadingButton } from "@mui/lab";
 import { MEDIA_QUERY } from "../../constants/index";
+import Statelabel from "../../components/StateLabel";
 import { iAccountSlice } from "../../store/slices/account-slice";
 import { iReduxState } from "../../store/slices/state.interface";
-import { getBondList, iBondData } from "../../utils/service";
-import { CustomButton, CustomButtonSmall } from "../../constants/assets/button";
 import useBond from "./useBond";
+import { useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
-import { prettifySeconds, ROI } from "../../utils/index";
-import Loader from "../../components/Loader";
+import { iAppSlice } from "../../store/slices/app-slice";
 
 enum eBondTab {
     bond = "bond",
@@ -29,13 +29,15 @@ export default () => {
 
     const [loading, setLoading] = useState(false);
     const [tabValue, setTabValue] = useState(eBondTab.bond);
+    const [treasury, setTreasury] = useState<number | string>("0");
 
     const { dialogOpenState, openDialog, onDialogClose } = useDialog();
-    const { buyBond, bondAmount, bondLoading, setBondAmount, setMaxAmount } = useBond();
+    const { bondAmount, bondLoading, buyBond, claimRedeemBond, setBondAmount, setMaxAmount } = useBond();
     const [dialogData, setDialogData] = useState({} as iBondDialogData);
 
     const [bondList, setBondList] = useState([] as iBondData[]);
     const account = useSelector<iReduxState, iAccountSlice>(state => state.account);
+    const appInfo = useSelector<iReduxState, iAppSlice>(state => state.app);
 
     const isSmallScreen = useMediaQuery(MEDIA_QUERY);
 
@@ -59,6 +61,22 @@ export default () => {
     }, [dialogOpenState]);
 
     useEffect(() => {
+        if (bondList.length > 0) {
+            // Set Treasury
+            (async () => {
+                const assetPool: iAssetPoolData = (await getAssetPool(bondList)) as iAssetPoolData;
+                const treasury = Object.keys(assetPool).reduce((prev, current, index) => {
+                    return ToHumanAmount(assetPool[current], appInfo.tokenPrecision[current.toLocaleLowerCase()]?.scale)
+                        .multipliedBy(appInfo.tokenPrice[current] || 1)
+                        .plus(prev)
+                        .toNumber();
+                }, 0);
+                setTreasury(treasury);
+            })();
+        }
+    }, [bondList]);
+
+    useEffect(() => {
         const init = async () => {
             setLoading(true);
             try {
@@ -78,12 +96,12 @@ export default () => {
 
             <div style={{ width: "100%" }}>
                 {/* Grid */}
-                <Grid container spacing={2} className="stat-container">
+                <Grid container spacing={0} className="stat-container">
                     <Grid item xs={12} sm={6} className="stat">
-                        <Statelabel title={"Treasury Balance"} value={100}></Statelabel>
+                        <Statelabel title={"Treasury Balance"} value={treasury}></Statelabel>
                     </Grid>
                     <Grid item xs={12} sm={6} className="stat">
-                        <Statelabel title={"FLY Price"} value={"$100"}></Statelabel>
+                        <Statelabel title={"FLY Price"} value={`$${appInfo.tokenPrice["fly"] || "1"}`}></Statelabel>
                     </Grid>
                 </Grid>
                 {/* Table */}
@@ -92,7 +110,32 @@ export default () => {
                 ) : (
                     <div>
                         {isSmallScreen ? ( // TODO: use card
-                            <div>"ok"</div>
+                            <div className="bond-card-list">
+                                {bondList.map((row, index) => (
+                                    <Card className="bond-card" key={index}>
+                                        <CardContent>
+                                            <Statelabel title={"Bond"} value={row.name}></Statelabel>
+                                            <Statelabel
+                                                title={"Price"}
+                                                value={ToHumanAmount(row.bond_price_usd as number, Math.pow(10, 18))
+                                                    .dp(4)
+                                                    .toNumber()}
+                                            ></Statelabel>
+                                            <Statelabel
+                                                title={"ROI"}
+                                                value={`${row
+                                                    .roi(1 * Math.pow(10, 18))
+                                                    .dp(4)
+                                                    .toNumber()}%`}
+                                            ></Statelabel>
+                                            <Statelabel title={"Purchased"} value={`${row.purchased(1).dp(4).toNumber()} %`}></Statelabel>
+                                            <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
+                                                Bond
+                                            </LoadingButton>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
                         ) : (
                             <TableContainer className="panel-table">
                                 <Table>
@@ -109,9 +152,19 @@ export default () => {
                                         {bondList.map((row, index) => (
                                             <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                                                 <TableCell>{row.name}</TableCell>
-                                                <TableCell>Price</TableCell>
-                                                <TableCell>ROI</TableCell>
-                                                <TableCell>Purchased</TableCell>
+                                                <TableCell>
+                                                    {ToHumanAmount(row.bond_price_usd as number, Math.pow(10, 18))
+                                                        .dp(4)
+                                                        .toNumber()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {row
+                                                        .roi(1 * Math.pow(10, 18))
+                                                        .dp(4)
+                                                        .toNumber()}
+                                                    %
+                                                </TableCell>
+                                                <TableCell>{row.purchased(1).dp(4).toNumber()} %</TableCell>
                                                 <TableCell>
                                                     <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                         Bond
@@ -134,26 +187,38 @@ export default () => {
                         <Tab label={eBondTab.bond} value={eBondTab.bond} />
                         <Tab label={eBondTab.redeem} value={eBondTab.redeem} />
                     </Tabs>
-                    <div className="dialog-form">
-                        <OutlinedInput
-                            placeholder="Amount"
-                            disabled={bondLoading}
-                            type="number"
-                            value={bondAmount}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <span className="max-btn" onClick={setMaxAmount}>
-                                        MAX
-                                    </span>
-                                </InputAdornment>
-                            }
-                            onChange={el => setBondAmount(Number(el.target.value))}
-                            autoFocus
-                        />
-                        <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => buyBond(dialogData)}>
-                            {tabValue}
-                        </LoadingButton>
-                    </div>
+                    {tabValue === eBondTab.bond && (
+                        <div className="dialog-form">
+                            <OutlinedInput
+                                placeholder="Amount"
+                                disabled={bondLoading}
+                                type="number"
+                                value={bondAmount}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <span className="max-btn" onClick={setMaxAmount}>
+                                            MAX
+                                        </span>
+                                    </InputAdornment>
+                                }
+                                onChange={el => setBondAmount(Number(el.target.value))}
+                                autoFocus
+                            />
+                            {/* TODO: redeem needs claim button */}
+                            <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => buyBond(dialogData)}>
+                                {tabValue}
+                            </LoadingButton>
+                        </div>
+                    )}
+                    {tabValue === eBondTab.redeem && (
+                        <div className="dialog-form">
+                            {/* TODO: redeem needs claim button */}
+                            <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => claimRedeemBond(dialogData)}>
+                                CLAIM
+                            </LoadingButton>
+                        </div>
+                    )}
+
                     <div className="dialog-data">
                         <DataRow title="Your Balance" value="100"></DataRow>
                         <DataRow title="You will Get" value="100"></DataRow>

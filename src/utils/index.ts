@@ -41,7 +41,7 @@ export enum CHAIN_NAME {
     proxima = 252,
 }
 
-export const CONTRACT_ADDRESS = "0xc137657e5aed5099592ba07c8ab44cc5".toLowerCase();
+export const CONTRACT_ADDRESS = "0x164fbb953f822fbba95d582b1794687c".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;

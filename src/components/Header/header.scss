@@ -21,7 +21,9 @@
     width: 100%;
     max-width: 900px;
     align-items: center;
-    margin: auto;
+    margin: 10px auto 0;
+    padding: 0 10px;
+    box-sizing: border-box;
 
     .dapp-topbar-slider-btn {
         background: rgba(255, 255, 255, 0.2);

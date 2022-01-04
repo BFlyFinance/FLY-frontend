@@ -13,7 +13,7 @@ export interface TokenPrice {
 
 interface TokenPersicion {
     scale: number;
-    percision: number;
+    precision: number;
 }
 export interface iAppSlice {
     loading: boolean;
@@ -31,11 +31,11 @@ const initialState: iAppSlice = {
     tokenPrecision: {
         fly: {
             scale: 1000000000,
-            percision: 9,
+            precision: 9,
         },
         stc: {
             scale: 1000000000,
-            percision: 9,
+            precision: 9,
         },
     },
 };
@@ -119,7 +119,7 @@ const appSlice = createSlice({
                 Object.keys(payload).forEach(key => {
                     state.tokenPrecision[key] = {
                         scale: payload[key] as number,
-                        percision: Math.floor(Math.log10(payload[key] as number)),
+                        precision: Math.floor(Math.log10(payload[key] as number)),
                     };
                 });
             });
