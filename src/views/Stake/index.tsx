@@ -38,7 +38,7 @@ export default () => {
         wramupDuration,
         stakedROI5days,
         apy,
-        tvl,
+        tvd,
         stakeToken,
         unStakeToken,
         setStakeInputAmount,
@@ -78,7 +78,7 @@ export default () => {
                     <Statelabel title={"APY"} value={`${apy}%`}></Statelabel>
                 </Grid>
                 <Grid item xs={12} sm={6} className="stat">
-                    <Statelabel title={"Total Value Deposited"} value={`$${numeral(tvl).format("0,0")}`}></Statelabel>
+                    <Statelabel title={"Total Value Deposited"} value={`$${numeral(tvd).format("0,0.00")}`}></Statelabel>
                 </Grid>
             </Grid>
             <div className="dialog-body">

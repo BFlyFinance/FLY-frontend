@@ -26,7 +26,7 @@ export default () => {
     const [stakedROI5days, setStakedROI5days] = useState<number | string>("0");
 
     const [apy, setApy] = useState(0);
-    const [tvl, setTvl] = useState(0);
+    const [tvd, setTvD] = useState(0);
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -56,7 +56,8 @@ export default () => {
             );
 
             const totalValueDeposited = await getTotalValueDeposited();
-            setTvl(totalValueDeposited * 1);
+            // TODO: update multiple price of fly
+            setTvD(ToHumanAmount(totalValueDeposited, appInfo?.tokenPrecision["fly"]?.scale).multipliedBy(1).dp(2).toNumber());
         })();
     }, []);
 
@@ -186,7 +187,7 @@ export default () => {
 
     return {
         apy,
-        tvl,
+        tvd,
         balance,
         stakeLoading,
         forfeiLoading,
