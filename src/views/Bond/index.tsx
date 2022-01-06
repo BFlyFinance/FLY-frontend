@@ -32,8 +32,7 @@ export default () => {
     const [treasury, setTreasury] = useState<number | string>("0");
 
     const { dialogOpenState, openDialog, onDialogClose } = useDialog();
-    const { bondAmount, bondLoading, buyBond, claimRedeemBond, setBondAmount, setMaxAmount } = useBond();
-    const [dialogData, setDialogData] = useState({} as iBondDialogData);
+    const { bondAmount, bondLoading, currentTokenBalance, bondDebtRatio, dialogData, setDialogData, buyBond, claimRedeemBond, setBondAmount, setMaxAmount } = useBond();
 
     const [bondList, setBondList] = useState([] as iBondData[]);
     const account = useSelector<iReduxState, iAccountSlice>(state => state.account);
@@ -59,6 +58,10 @@ export default () => {
             setBondAmount("");
         }
     }, [dialogOpenState]);
+
+    // useEffect(() => {
+    //     console.log(account);
+    // }, [account]);
 
     useEffect(() => {
         if (bondList.length > 0) {
@@ -164,7 +167,7 @@ export default () => {
                                                         .toNumber()}
                                                     %
                                                 </TableCell>
-                                                <TableCell>{row.purchased(1).dp(4).toNumber()} %</TableCell>
+                                                <TableCell>{row.purchased(1).dp(4).toNumber()}%</TableCell>
                                                 <TableCell>
                                                     <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                         Bond
@@ -212,18 +215,28 @@ export default () => {
                     )}
                     {tabValue === eBondTab.redeem && (
                         <div className="dialog-form">
+                            <DataRow title={"Vesting Percent"} value={`${account?.bondDetail[dialogData?.name?.toLowerCase()]?.vesting_percent || 0 * 100}%`}></DataRow>
                             {/* TODO: redeem needs claim button */}
-                            <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => claimRedeemBond(dialogData)}>
+                            <LoadingButton
+                                disabled={account?.bondDetail[dialogData?.name?.toLowerCase()]?.vesting_percent == 0}
+                                sx={CustomButton}
+                                loading={bondLoading}
+                                variant="contained"
+                                color="primary"
+                                onClick={() => claimRedeemBond(dialogData)}
+                            >
                                 CLAIM
                             </LoadingButton>
                         </div>
                     )}
 
                     <div className="dialog-data">
-                        <DataRow title="Your Balance" value="100"></DataRow>
-                        <DataRow title="You will Get" value="100"></DataRow>
-                        <DataRow title="ROI" value={ROI({ tokenPrice: 2, bondPrice: 1 })}></DataRow>
-                        <DataRow title="Debt Ratio" value="100"></DataRow>
+                        <DataRow title="Your Balance" value={currentTokenBalance}></DataRow>
+                        {/* Basc on inputNumber * current token price / bond price */}
+                        <DataRow title="You will Get" value="0"></DataRow>
+                        {/* ROI = (1 - bond_price / oracle_price<FLY>) * 100  (%) */}
+                        <DataRow title="ROI" value={ROI({ tokenPrice: 1, bondPrice: 1 })}></DataRow>
+                        <DataRow title="Debt Ratio" value={bondDebtRatio}></DataRow>
                         <DataRow title="Vesting Term" value={prettifySeconds(dialogData.vesting_term)}></DataRow>
                     </div>
                 </div>

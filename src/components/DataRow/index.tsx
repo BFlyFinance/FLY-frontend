@@ -3,7 +3,7 @@ import "./index.scss";
 
 export interface iDataRowProps {
     title: string;
-    value: string | React.ReactElement;
+    value: string | React.ReactElement | number;
 }
 
 const DataRow = (props: iDataRowProps) => {

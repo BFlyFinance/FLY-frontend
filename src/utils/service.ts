@@ -1,4 +1,17 @@
-import { CONTRACT_ADDRESS, KEY_Balance, TOKEN_FLY, ToChainAmount, ToHumanAmount, chainRpc, requestChain, resultDesc } from "./index";
+import {
+    CONTRACT_ADDRESS,
+    KEY_Balance,
+    TOKEN_FLY,
+    ToChainAmount,
+    chainRpc,
+    requestChain,
+    resultDesc,
+    TOKEN_FAI,
+    TOKEN_STC,
+    TOKEN_FLY_FAI,
+    TOKEN_FLY_STC,
+    ToHumanAmount,
+} from "./index";
 import TxnWrapper, { JsonProvider } from "./TxnWrapper";
 import { iBondDetail, iStakeDetail } from "../store/slices/account-slice";
 import BigNumber from "bignumber.js";
@@ -26,7 +39,7 @@ export const getMarketIndex = async () => {
 };
 
 // ========================================================
-// Use FLY Balance
+// User FLY Balance
 // ========================================================
 export const getUserFLYBalance = async (address: string) => {
     try {
@@ -39,19 +52,86 @@ export const getUserFLYBalance = async (address: string) => {
 };
 
 // ========================================================
+// User Balances for Bond trade
+// ========================================================
+export const getUserBalancesForBondTrade = async (address: string) => {
+    try {
+        const faiResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FAI), { decode: true }]));
+        const stcResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_STC), { decode: true }]));
+        const flyFaiResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FLY_FAI), { decode: true }]));
+        const flySTCResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FLY_STC), { decode: true }]));
+
+        return {
+            fai: faiResult?.token?.value || 0,
+            stc: stcResult?.token?.value || 0,
+            "fly-fai lp": flyFaiResult?.token?.value || 0,
+            "fly-stc lp": flySTCResult?.token?.value || 0,
+        };
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+};
+
+// ========================================================
+// User Bond Info
+// ========================================================
+export const getUserBondInfo = async (address: string, tokenAddress: string) => {
+    try {
+        const bondInfo = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<${TOKEN_STC}>`, { decode: true }])) as iBondDetail;
+        if (bondInfo) {
+            const vestingPercent = await getUserBondVesting(address, tokenAddress);
+            bondInfo["vesting_percent"] = vestingPercent;
+        }
+        return bondInfo || null;
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+};
+
+// ========================================================
+// User Bond Vesting
+// ========================================================
+
+export const getUserBondVesting = async (address: string, tokenAddress: string) => {
+    try {
+        const result = await requestChain("contract.call_v2", [
+            {
+                function_id: `${CONTRACT_ADDRESS}::Bond::percent_vested`,
+                type_args: [tokenAddress],
+                args: [address],
+            },
+        ]);
+
+        return result.data?.result ? ToHumanAmount(result.data.result, Math.pow(10, 18)).dp(4).toNumber() : 0;
+    } catch (e) {
+        console.log(e);
+        return 0;
+    }
+};
+
+// ========================================================
 // User Staked
 // ========================================================
 export const getUserStakedAndBond = async (address: string) => {
     try {
         const stakedDetail = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Stake::SFLY`, { decode: true }])) as iStakeDetail;
-        const bondDetail = resultDesc(
-            await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<0x00000000000000000000000000000001::STC::STC>`, { decode: true }]),
-        ) as iBondDetail;
+        const bondDetail = {
+            stc: await getUserBondInfo(address, TOKEN_STC),
+            fai: await getUserBondInfo(address, TOKEN_FAI),
+            "fly-stc lp": await getUserBondInfo(address, TOKEN_FLY_STC),
+            "fly-fai lp": await getUserBondInfo(address, TOKEN_FLY_FAI),
+        };
+        // token balance in address wallet
+        const bondTokenBalance = await getUserBalancesForBondTrade(address);
+
         const bondReleasedDetail = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::ReleasedRate`, { decode: true }]));
 
         return {
             stakedDetail,
             bondDetail,
+            bondTokenBalance,
             bondReleasedDetail,
         };
     } catch (e) {
@@ -65,6 +145,7 @@ export const getUserStakedAndBond = async (address: string) => {
 export interface iBondData {
     name: string;
     tokenAddress: string;
+    debtRatio: number;
     tokens?: string[];
     vesting_term?: number;
     total_purchased?: number;
@@ -104,7 +185,12 @@ export const getBondList = async () => {
                     }
 
                     const [bond_price_usd] = (await getBondPriceUSD(tokenAddress)) || [];
+                    // Bond Info
                     const { total_debt, total_purchased, last_update_time } = (await getBondInfo(tokenAddress)) as iBondInfo;
+
+                    const debtRatio = (await getBondDebtRatio(tokenAddress)) || 0;
+                    // Does user have this bond?
+                    // Bond versting percent
 
                     const matchResult = key.match(/.+(<.*?>).+/);
                     if (matchResult && matchResult.length > 1) {
@@ -124,6 +210,7 @@ export const getBondList = async () => {
                             total_purchased,
                             last_update_time,
                             bond_price_usd,
+                            debtRatio,
                             name: `${tokenNames.join("-")}${tokens.length > 1 ? " LP" : ""}`,
                             roi: (oracle_price_fly: number) =>
                                 ROICalcu({
@@ -166,6 +253,19 @@ export const getBondInfo = async (tokenAddress: string) => {
 };
 
 // ========================================================
+// Bond Debt Ratio
+// ========================================================
+export const getBondDebtRatio = async (tokenAddress: string) => {
+    try {
+        const result = await requestChain("contract.call_v2", [{ function_id: `${CONTRACT_ADDRESS}::MarketScript::debt_ratio`, args: [], type_args: [tokenAddress] }]);
+        return result.data?.result ? result.data?.result[0] || 0 : 0;
+    } catch (e) {
+        console.log(e);
+        return 0;
+    }
+};
+
+// ========================================================
 // Bond Price
 // ========================================================
 export const getBondPriceUSD = async (tokenAddress: string) => {
@@ -202,7 +302,7 @@ export const buyBondService = async ({ tokenAddress, amount, bond_price_usd = 10
 // ========================================================
 export const claimRedeemBondService = async (tokenAddress: string) => {
     return TxnWrapper({
-        functionId: `${CONTRACT_ADDRESS}::MarketScript::buy_bond`,
+        functionId: `${CONTRACT_ADDRESS}::MarketScript::redeem`,
         typeTag: [tokenAddress],
         params: [],
     });

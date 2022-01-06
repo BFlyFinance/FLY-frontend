@@ -17,12 +17,12 @@ export const prettifySeconds = (seconds?: number, resolution?: string) => {
     const m = Math.floor((seconds % 3600) / 60);
 
     if (resolution === "day") {
-        return d + (d == 1 ? " day" : " days");
+        return d + (d == 1 ? " Day" : " Days");
     }
 
-    const dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
-    const hDisplay = h > 0 ? h + (h == 1 ? " Hour, " : " Hours, ") : "";
-    const mDisplay = m > 0 ? m + (m == 1 ? " Min" : " Mins") : "";
+    const dDisplay = d > 0 ? d + (d == 1 ? " Day, " : " Days, ") : "0 day, ";
+    const hDisplay = h > 0 ? h + (h == 1 ? " Hour, " : " Hours, ") : "0 Hour, ";
+    const mDisplay = m > 0 ? m + (m == 1 ? " Min" : " Mins") : "0 Min";
 
     return dDisplay + hDisplay + mDisplay;
 };
@@ -43,10 +43,11 @@ export enum CHAIN_NAME {
 
 export const CONTRACT_ADDRESS = "0x7231eb1a18d8711336b21f6106697253".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
+export const TOKEN_FAI = `${CONTRACT_ADDRESS}::TokenMock::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;
-export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${CONTRACT_ADDRESS}::TokenMock::FAI, ${CONTRACT_ADDRESS}::FLY::FLY>`;
-export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${CONTRACT_ADDRESS}::FLY::FLY>`;
+export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
+export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${TOKEN_FLY}>`;
 
 export const chainRpc = () => `https://${CHAIN_NAME[252]}-seed.starcoin.org/`;
 

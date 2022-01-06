@@ -3,12 +3,16 @@ import BigNumber from "bignumber.js";
 
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 
-import { CHAIN_NAME } from "../../utils";
-import { requestChain, TOKEN_FLY, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
+import { requestChain, TOKEN_FLY, CHAIN_NAME, TOKEN_FAI, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
 import { RootState } from "../index";
+import { getBondDebtRatio } from "../../utils/service";
 
 export interface TokenPrice {
     [key: string]: string;
+}
+
+export interface BondDebtRatio {
+    [key: string]: number;
 }
 
 interface TokenPersicion {
@@ -18,6 +22,7 @@ interface TokenPersicion {
 export interface iAppSlice {
     loading: boolean;
     tokenPrice: TokenPrice;
+    bondDebtRatio: BondDebtRatio;
     marketIndex: number | null;
     tokenPrecision: {
         [key: string]: TokenPersicion;
@@ -27,6 +32,7 @@ export interface iAppSlice {
 const initialState: iAppSlice = {
     loading: true,
     tokenPrice: {},
+    bondDebtRatio: {},
     marketIndex: null,
     tokenPrecision: {
         fly: {

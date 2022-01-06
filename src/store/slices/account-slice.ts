@@ -17,6 +17,7 @@ export interface iBondDetail {
     payout: number;
     price_paid: number;
     start_time: number;
+    vesting_percent: number;
     token: {
         [key: string]: any;
     };
@@ -27,8 +28,9 @@ export interface iAccountSlice {
     loading: boolean;
     address: string;
     short_address: string;
+    bondTokenBalance: { [key: string]: number };
     stakedDetail: iStakeDetail;
-    bondDetail: iBondDetail;
+    bondDetail: { [key: string]: iBondDetail };
     bondReleasedDetail: any;
 }
 
@@ -36,8 +38,9 @@ const initialState: iAccountSlice = {
     loading: false,
     address: "",
     short_address: "",
+    bondTokenBalance: {},
     stakedDetail: {} as iStakeDetail,
-    bondDetail: {} as iBondDetail,
+    bondDetail: {} as { [key: string]: iBondDetail },
     bondReleasedDetail: {},
 };
 
@@ -97,6 +100,7 @@ const accountSlice = createSlice({
             })
             .addCase(getAccountStakedAndBond.fulfilled, (state, actions) => {
                 state.loading = false;
+                console.log(actions.payload);
                 Object.assign(state, actions.payload as {});
             });
     },
