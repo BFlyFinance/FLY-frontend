@@ -1,4 +1,4 @@
-import { GetTransactionStatus, getUserFLYBalance, stakeService, unStakeService, getRewardRatio, getTotalValueDeposited } from "../../utils/service";
+import { GetTransactionStatus, getUserFLYBalance, stakeService, forfeitService, unStakeService, getRewardRatio, getTotalValueDeposited } from "../../utils/service";
 import { getAccountStakedAndBond, iAccountSlice } from "../../store/slices/account-slice";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import { ToHumanAmount } from "../../utils/index";
 import { iAppSlice } from "../../store/slices/app-slice";
 import { iReduxState } from "../../store/slices/state.interface";
 import { useSnackbar } from "notistack";
+import dayjs from "dayjs";
 
 export default () => {
     const appInfo = useSelector<iReduxState, iAppSlice>(state => state.app);
@@ -15,10 +16,15 @@ export default () => {
     const dispatch = useDispatch();
 
     const [stakeLoading, setStakeLoading] = useState(false);
-    const [stakeAmount, setStakeAmount] = useState<number | string>("");
+    const [forfeiLoading, setForfeiLoading] = useState(false);
+    const [stakeInputAmount, setStakeInputAmount] = useState<number | string>("");
     const [balance, setBalance] = useState<number | string>("");
     const [stakedBalance, setStakedBalance] = useState("0");
+    const [wramupBalance, setWramupBalance] = useState<number | string>("");
+    const [isWramupExpired, setIsWramupExpired] = useState(false);
+    const [wramupDuration, setWramupDuration] = useState("");
     const [stakedROI5days, setStakedROI5days] = useState<number | string>("0");
+
     const [apy, setApy] = useState(0);
     const [tvl, setTvl] = useState(0);
 
@@ -68,34 +74,53 @@ export default () => {
     }, [account.address, getUserFLYBalanceCallback]);
 
     useEffect(() => {
-        setStakedBalance(
-            ToHumanAmount(new BigNumber(account?.stakedDetail?.warmup_amount || 0).plus(account.stakedDetail?.amount || 0).toNumber(), appInfo.tokenPrecision["fly"]?.scale)
-                // TODO: replace to fly price
-                .multipliedBy(1)
-                .valueOf(),
-        );
+        setIsWramupExpired(dayjs().isBefore(account.stakedDetail?.warmup_expires * 1000));
+
+        // If wramup expired then staked balance = amount + wramup_amount
+        if (!isWramupExpired) {
+            setStakedBalance(
+                ToHumanAmount(new BigNumber(account.stakedDetail?.amount || 0).toNumber(), appInfo.tokenPrecision["fly"]?.scale)
+                    // TODO: replace to fly price
+                    .multipliedBy(1)
+                    .valueOf(),
+            );
+            if (!!account.stakedDetail?.warmup_expires) {
+                setWramupDuration(`(Expired At: ${dayjs(account.stakedDetail?.warmup_expires * 1000).format("YYYY-MM-DD HH:mm:ss")})`);
+            }
+        } else {
+            setStakedBalance(
+                ToHumanAmount(new BigNumber(account?.stakedDetail?.warmup_amount || 0).plus(account.stakedDetail?.amount || 0).toNumber(), appInfo.tokenPrecision["fly"]?.scale)
+                    // TODO: replace to fly price
+                    .multipliedBy(1)
+                    .valueOf(),
+            );
+            setWramupDuration("");
+        }
+
+        setWramupBalance(ToHumanAmount(account.stakedDetail?.warmup_amount || 0, appInfo.tokenPrecision["fly"]?.scale).valueOf());
     }, [account.stakedDetail, account.address]);
 
     const setMaxAmount = useCallback(() => {
-        setStakeAmount(balance);
+        setStakeInputAmount(balance);
     }, [balance]);
 
     const setUnStakeMaxAmount = useCallback(() => {
-        setStakeAmount(stakedBalance);
+        // Only set staked amount without wramup amount
+        setStakeInputAmount(ToHumanAmount(account?.stakedDetail?.amount || 0, appInfo.tokenPrecision["fly"]?.scale).valueOf());
     }, [stakedBalance]);
 
     const stakeToken = async (name: string) => {
         try {
-            if (stakeAmount !== 0 && stakeAmount !== "") {
+            if (stakeInputAmount !== 0 && stakeInputAmount !== "") {
                 setStakeLoading(true);
 
                 const tokenName = name.toLocaleLowerCase();
-                const txn = await stakeService({ amount: new BigNumber(stakeAmount).toNumber(), precision: appInfo.tokenPrecision[tokenName]?.scale });
+                const txn = await stakeService({ amount: new BigNumber(stakeInputAmount).toNumber(), precision: appInfo.tokenPrecision[tokenName]?.scale });
                 const currentTxnStatus = await GetTransactionStatus(txn);
 
                 if (currentTxnStatus?.status === "Executed") {
                     enqueueSnackbar("Transaction Successed!", { variant: "success" });
-                    setStakeAmount("");
+                    setStakeInputAmount("");
                 } else if (typeof currentTxnStatus?.status === "object") {
                     enqueueSnackbar(`${txn} Transaction Faild!`, { variant: "error" });
                 }
@@ -114,16 +139,16 @@ export default () => {
 
     const unStakeToken = async (name: string) => {
         try {
-            if (stakeAmount !== 0 && stakeAmount !== "") {
+            if (stakeInputAmount !== 0 && stakeInputAmount !== "") {
                 setStakeLoading(true);
 
                 const tokenName = name.toLocaleLowerCase();
-                const txn = await unStakeService({ amount: new BigNumber(stakeAmount).toNumber(), precision: appInfo.tokenPrecision[tokenName]?.scale });
+                const txn = await unStakeService({ amount: new BigNumber(stakeInputAmount).toNumber(), precision: appInfo.tokenPrecision[tokenName]?.scale });
                 const currentTxnStatus = await GetTransactionStatus(txn);
 
                 if (currentTxnStatus?.status === "Executed") {
                     enqueueSnackbar("Transaction Successed!", { variant: "success" });
-                    setStakeAmount("");
+                    setStakeInputAmount("");
                 } else if (typeof currentTxnStatus?.status === "object") {
                     enqueueSnackbar(`${txn} Transaction Faild!`, { variant: "error" });
                 }
@@ -138,18 +163,45 @@ export default () => {
         }
     };
 
+    const forfeitToken = async () => {
+        setForfeiLoading(true);
+        setStakeLoading(true);
+        try {
+            const txn = await forfeitService();
+            const currentTxnStatus = await GetTransactionStatus(txn);
+            if (currentTxnStatus?.status === "Executed") {
+                enqueueSnackbar("Transaction Successed!", { variant: "success" });
+            } else if (typeof currentTxnStatus?.status === "object") {
+                enqueueSnackbar(`${txn} Transaction Faild!`, { variant: "error" });
+            }
+
+            getUserFLYBalanceCallback();
+            dispatch(getAccountStakedAndBond(account.address));
+        } catch (e: any) {
+            enqueueSnackbar(e.toString(), { variant: "error" });
+        }
+        setForfeiLoading(false);
+        setStakeLoading(false);
+    };
+
     return {
         apy,
         tvl,
         balance,
         stakeLoading,
-        stakeAmount,
+        forfeiLoading,
+        stakeInputAmount,
+        wramupBalance,
         stakedBalance,
         stakedROI5days,
+        isWramupExpired,
+        wramupDuration,
+
         setStakedROI5days,
         stakeToken,
         unStakeToken,
-        setStakeAmount,
+        forfeitToken,
+        setStakeInputAmount,
         setUnStakeMaxAmount,
         setMaxAmount,
     };

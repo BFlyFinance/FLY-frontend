@@ -1,6 +1,6 @@
 import "./index.scss";
 
-import { Grid, InputAdornment, OutlinedInput, Skeleton, Tab, Tabs, useMediaQuery } from "@mui/material";
+import { Grid, InputAdornment, OutlinedInput, Tab, Tabs, useMediaQuery } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
 import { CustomButton } from "../../constants/assets/button";
@@ -10,6 +10,11 @@ import { MEDIA_QUERY } from "../../constants/index";
 import Statelabel from "../../components/StateLabel/index";
 import useStake from "./useStake";
 import numeral from "numeral";
+import BigNumber from "bignumber.js";
+import { useSelector } from "react-redux";
+import { iReduxState } from "../../store/slices/state.interface";
+import { iAccountSlice } from "../../store/slices/account-slice";
+import { ToHumanAmount } from "../../utils";
 
 enum eStakeTab {
     stake = "stake",
@@ -17,36 +22,52 @@ enum eStakeTab {
 }
 
 export default () => {
-    const [loading, setLoading] = useState(false);
     const [tabValue, setTabValue] = useState(eStakeTab.stake);
+    const [overBalanceLimit, setOverBalanceLimit] = useState(false);
+    const account = useSelector<iReduxState, iAccountSlice>(state => state.account);
+    const appInfo = useSelector<iReduxState, any>(state => state.app);
 
     const isSmallScreen = useMediaQuery(MEDIA_QUERY);
     const {
         stakeLoading,
-        stakeAmount,
+        forfeiLoading,
+        stakeInputAmount,
         balance,
         stakedBalance,
+        wramupBalance,
+        wramupDuration,
         stakedROI5days,
         apy,
         tvl,
         stakeToken,
         unStakeToken,
-        setStakeAmount,
+        setStakeInputAmount,
         setMaxAmount,
         setUnStakeMaxAmount,
-        setStakedROI5days,
+        forfeitToken,
     } = useStake();
 
     const onTabChanged = useCallback((event: React.SyntheticEvent, newValue: eStakeTab) => {
         setTabValue(newValue as eStakeTab);
     }, []);
 
-    const inputChangeHandler = useCallback(value => {
-        setStakeAmount(value.replace(/^0(\d)/, "$1"));
-    }, []);
+    const inputChangeHandler = useCallback(
+        value => {
+            const inputNumber = value.replace(/^0(\d)/, "$1");
+
+            if (tabValue === eStakeTab.stake) {
+                setOverBalanceLimit(new BigNumber(inputNumber).isGreaterThan(balance));
+            } else if (tabValue === eStakeTab.unstake) {
+                setOverBalanceLimit(new BigNumber(inputNumber).isGreaterThan(ToHumanAmount(account?.stakedDetail?.amount, appInfo.tokenPrecision["fly"]?.scale)));
+            }
+
+            setStakeInputAmount(value.replace(/^0(\d)/, "$1"));
+        },
+        [tabValue, balance, appInfo.tokenPrecision["fly"]?.scale],
+    );
 
     useEffect(() => {
-        setStakeAmount(0);
+        setStakeInputAmount(0);
     }, [tabValue]);
 
     return (
@@ -70,7 +91,7 @@ export default () => {
                         placeholder="Amount"
                         disabled={stakeLoading}
                         type="number"
-                        value={stakeAmount}
+                        value={stakeInputAmount}
                         endAdornment={
                             <InputAdornment position="end">
                                 <span className="max-btn" onClick={() => (tabValue === eStakeTab.stake ? setMaxAmount() : setUnStakeMaxAmount())}>
@@ -81,20 +102,35 @@ export default () => {
                         onChange={el => inputChangeHandler(el.target.value)}
                         autoFocus
                     />
+                    {overBalanceLimit && <p className="error-tips">Over Balance Limit</p>}
                     <LoadingButton
                         sx={CustomButton}
                         loading={stakeLoading}
                         variant="contained"
                         color="primary"
+                        disabled={overBalanceLimit}
                         onClick={() => (tabValue === eStakeTab.stake ? stakeToken("fly") : unStakeToken("fly"))}
                     >
                         {tabValue}
                     </LoadingButton>
                 </div>
                 <div className="dialog-data">
-                    <DataRow title="Your Balance" value={`$${balance}`}></DataRow>
-                    <DataRow title="Staked Balance" value={`$${stakedBalance}`}></DataRow>
+                    <DataRow title="Your Balance" value={`${balance} FLY`}></DataRow>
+                    <DataRow title="Staked Balance" value={`${stakedBalance} FLY`}></DataRow>
                     <DataRow title="ROI (5-Day Rate)" value={`${stakedROI5days}%`}></DataRow>
+                    <DataRow
+                        title={`Wramup FLY Amount ${wramupDuration}`}
+                        value={
+                            <div className="forfeit-btn-box">
+                                {wramupBalance} FLY
+                                {wramupBalance != 0 ? (
+                                    <LoadingButton className="forfeit-btn" sx={CustomButton} variant="contained" loading={forfeiLoading} onClick={() => forfeitToken()}>
+                                        FORFEIT
+                                    </LoadingButton>
+                                ) : null}
+                            </div>
+                        }
+                    ></DataRow>
                 </div>
             </div>
         </div>

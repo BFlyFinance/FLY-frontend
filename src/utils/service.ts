@@ -233,6 +233,17 @@ export const unStakeService = async ({ amount, precision }: iStakeData) => {
 };
 
 // ========================================================
+// Forfeit
+// ========================================================
+export const forfeitService = async () => {
+    return TxnWrapper({
+        functionId: `${CONTRACT_ADDRESS}::MarketScript::forfeit`,
+        typeTag: [],
+        params: [],
+    });
+};
+
+// ========================================================
 // Reward Ratio
 // ========================================================
 export const getRewardRatio = async () => {

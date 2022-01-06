@@ -1,8 +1,9 @@
+import React from "react";
 import "./index.scss";
 
 export interface iDataRowProps {
     title: string;
-    value: string;
+    value: string | React.ReactElement;
 }
 
 const DataRow = (props: iDataRowProps) => {

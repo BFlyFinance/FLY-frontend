@@ -1,6 +1,14 @@
 .App {
     display: flex;
 
+    .error-tips {
+        width: 100%;
+        text-align: center;
+        color: red;
+        margin: 0;
+        height: 30px;
+    }
+
     .main {
         width: 100%;
 
