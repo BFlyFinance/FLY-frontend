@@ -49,7 +49,7 @@ export const TOKEN_STC = `0x1::STC::STC`;
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${TOKEN_FLY}>`;
 
-export const chainRpc = () => `https://${CHAIN_NAME[252]}-seed.starcoin.org/`;
+export const chainRpc = () => `https://${CHAIN_NAME[251]}-seed.starcoin.org/`;
 
 export const requestChain = async (method: string, params: any) =>
     await axios.post(chainRpc(), {
