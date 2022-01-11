@@ -167,7 +167,9 @@ export default () => {
                                                         .toNumber()}
                                                     %
                                                 </TableCell>
-                                                <TableCell>{row.purchased(1).dp(4).toNumber()}%</TableCell>
+                                                <TableCell>
+                                                    ${ToHumanAmount(row.purchased(1).toNumber(), appInfo?.tokenPrecision[row.name.toLowerCase()]?.scale).toNumber()}
+                                                </TableCell>
                                                 <TableCell>
                                                     <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                         Bond
