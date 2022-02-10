@@ -43,6 +43,7 @@ export enum CHAIN_NAME {
 
 export const CONTRACT_ADDRESS = "0xA4c60527238c2893deAF3061B759c11E".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
+export const FLY_PRICE_USD = `${CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
 export const TOKEN_FAI = `0xfe125d419811297dfab03c61efec0bc9::FAI::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;

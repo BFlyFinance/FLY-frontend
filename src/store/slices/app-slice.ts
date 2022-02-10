@@ -5,7 +5,7 @@ import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
 
 import { requestChain, TOKEN_FLY, CHAIN_NAME, TOKEN_FAI, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
 import { RootState } from "../index";
-import { getBondDebtRatio } from "../../utils/service";
+import { getBondDebtRatio, getFlyPrice } from "../../utils/service";
 
 export interface TokenPrice {
     [key: string]: string;
@@ -59,6 +59,8 @@ export const getOracle = createAsyncThunk("app/getOracle", async () => {
             });
 
         result["MUSDT"] = "1";
+        result["FLY"] = new BigNumber((await getFlyPrice()) || 0).shiftedBy(-5).valueOf();
+
         return result;
     } catch (err) {
         console.log(err);

@@ -11,6 +11,7 @@ import {
     TOKEN_FLY_FAI,
     TOKEN_FLY_STC,
     ToHumanAmount,
+    FLY_PRICE_USD,
 } from "./index";
 import TxnWrapper, { JsonProvider } from "./TxnWrapper";
 import { iBondDetail, iStakeDetail } from "../store/slices/account-slice";
@@ -184,7 +185,9 @@ export const getBondList = async () => {
                         tokenAddress = tokenResult[1];
                     }
 
-                    const [bond_price_usd] = (await getBondPriceUSD(tokenAddress)) || [];
+                    const [bond_price_usd_big] = (await getBondPriceUSD(tokenAddress)) || [];
+                    // bond_price needs shiftedBy
+                    const bond_price_usd = new BigNumber(bond_price_usd_big).shiftedBy(-18).dp(2).toString();
                     // Bond Info
                     const { total_debt, total_purchased, last_update_time } = (await getBondInfo(tokenAddress)) as iBondInfo;
 
@@ -218,7 +221,7 @@ export const getBondList = async () => {
                                     oracle_price_fly: new BigNumber(oracle_price_fly),
                                 } as iRoiCalcuData),
                             purchased: (oracle_price_lp: number) => {
-                                return new BigNumber(total_purchased).times(oracle_price_lp);
+                                return new BigNumber(total_purchased).times(bond_price_usd || 0);
                             },
                             ...payload,
                         };
@@ -231,6 +234,19 @@ export const getBondList = async () => {
     } catch (e) {
         console.error(e);
         return [];
+    }
+};
+
+// ========================================================
+// FLY price
+// ========================================================
+export const getFlyPrice = async () => {
+    try {
+        const result = await requestChain("contract.call_v2", [{ function_id: "0x1::PriceOracle::read", args: [CONTRACT_ADDRESS], type_args: [FLY_PRICE_USD] }]);
+        return result.data?.result ? result.data?.result[0] || 0 : 0;
+    } catch (e) {
+        console.log(e);
+        return 0;
     }
 };
 
@@ -292,7 +308,6 @@ export const buyBondService = async ({ tokenAddress, amount, bond_price_usd = 10
     return TxnWrapper({
         functionId: `${CONTRACT_ADDRESS}::MarketScript::buy_bond`,
         typeTag: [tokenAddress],
-        // TODO: max_price
         params: [ToChainAmount(amount, precision), bond_price_usd],
     });
 };

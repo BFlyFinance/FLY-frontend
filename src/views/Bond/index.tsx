@@ -52,16 +52,38 @@ export default () => {
         setTabValue(newValue as eBondTab);
     }, []);
 
+    const updateBondList = useCallback(async () => {
+        setLoading(true);
+        try {
+            setBondList((await getBondList()) as iBondData[]);
+            setLoading(false);
+        } catch (e: any) {
+            enqueueSnackbar(e.toString(), { variant: "error" });
+        }
+    }, []);
+
+    const buyBondAndUpdateBondList = useCallback(
+        async (dialogData: iBondDialogData) => {
+            await buyBond(dialogData);
+            await updateBondList();
+        },
+        [buyBond, updateBondList],
+    );
+
+    const redeemBondAndUpdateBondList = useCallback(
+        async (dialogData: iBondDialogData) => {
+            await claimRedeemBond(dialogData);
+            await updateBondList();
+        },
+        [claimRedeemBond, updateBondList],
+    );
+
     useEffect(() => {
         if (!dialogOpenState) {
             setDialogData({} as iBondDialogData);
             setBondAmount("");
         }
     }, [dialogOpenState]);
-
-    // useEffect(() => {
-    //     console.log(account);
-    // }, [account]);
 
     useEffect(() => {
         if (bondList.length > 0) {
@@ -81,13 +103,7 @@ export default () => {
 
     useEffect(() => {
         const init = async () => {
-            setLoading(true);
-            try {
-                setBondList((await getBondList()) as iBondData[]);
-                setLoading(false);
-            } catch (e: any) {
-                enqueueSnackbar(e.toString(), { variant: "error" });
-            }
+            updateBondList();
         };
 
         init();
@@ -104,7 +120,7 @@ export default () => {
                         <Statelabel title={"Treasury Balance"} value={treasury}></Statelabel>
                     </Grid>
                     <Grid item xs={12} sm={6} className="stat">
-                        <Statelabel title={"FLY Price"} value={`$${appInfo.tokenPrice["fly"] || "1"}`}></Statelabel>
+                        <Statelabel title={"FLY Price"} value={`$${appInfo.tokenPrice["FLY"]}`}></Statelabel>
                     </Grid>
                 </Grid>
                 {/* Table */}
@@ -112,7 +128,7 @@ export default () => {
                     <Loader />
                 ) : (
                     <div>
-                        {isSmallScreen ? ( // TODO: use card
+                        {isSmallScreen ? (
                             <div className="bond-card-list">
                                 {bondList.map((row, index) => (
                                     <Card className="bond-card" key={index}>
@@ -131,7 +147,7 @@ export default () => {
                                                     .dp(4)
                                                     .toNumber()}%`}
                                             ></Statelabel>
-                                            <Statelabel title={"Purchased"} value={`${row.purchased(1).dp(4).toNumber()} %`}></Statelabel>
+                                            <Statelabel title={"Purchased"} value={`$${row.purchased(Number(appInfo.tokenPrice["FLY"])).dp(2).toNumber()}`}></Statelabel>
                                             <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                 Bond
                                             </LoadingButton>
@@ -167,9 +183,7 @@ export default () => {
                                                         .toNumber()}
                                                     %
                                                 </TableCell>
-                                                <TableCell>
-                                                    ${ToHumanAmount(row.purchased(1).toNumber(), appInfo?.tokenPrecision[row.name.toLowerCase()]?.scale).toNumber()}
-                                                </TableCell>
+                                                <TableCell>{`$${row.purchased(Number(appInfo.tokenPrice["FLY"])).dp(2).toNumber()}`}</TableCell>
                                                 <TableCell>
                                                     <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                         Bond
@@ -209,23 +223,21 @@ export default () => {
                                 onChange={el => setBondAmount(Number(el.target.value))}
                                 autoFocus
                             />
-                            {/* TODO: redeem needs claim button */}
-                            <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => buyBond(dialogData)}>
+                            <LoadingButton sx={CustomButton} loading={bondLoading} variant="contained" color="primary" onClick={() => buyBondAndUpdateBondList(dialogData)}>
                                 {tabValue}
                             </LoadingButton>
                         </div>
                     )}
                     {tabValue === eBondTab.redeem && (
                         <div className="dialog-form">
-                            <DataRow title={"Vesting Percent"} value={`${account?.bondDetail[dialogData?.name?.toLowerCase()]?.vesting_percent || 0 * 100}%`}></DataRow>
-                            {/* TODO: redeem needs claim button */}
+                            <DataRow title={"Vesting Percent"} value={`${(account?.bondDetail[dialogData?.name?.toLowerCase()]?.vesting_percent || 0) * 100}%`}></DataRow>
                             <LoadingButton
                                 disabled={account?.bondDetail[dialogData?.name?.toLowerCase()]?.vesting_percent == 0}
                                 sx={CustomButton}
                                 loading={bondLoading}
                                 variant="contained"
                                 color="primary"
-                                onClick={() => claimRedeemBond(dialogData)}
+                                onClick={() => redeemBondAndUpdateBondList(dialogData)}
                             >
                                 CLAIM
                             </LoadingButton>

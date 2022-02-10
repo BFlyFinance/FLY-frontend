@@ -11,3 +11,7 @@
     flex-shrink: 0;
     height: 30px;
 }
+
+.MuiLoadingButton-root.Mui-disabled {
+    color: #666 !important;
+}
