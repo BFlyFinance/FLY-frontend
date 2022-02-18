@@ -43,6 +43,10 @@ const initialState: iAppSlice = {
             scale: 1000000000,
             precision: 9,
         },
+        "fai-fly lp": {
+            scale: 1e18,
+            precision: 18,
+        },
     },
 };
 

@@ -12,6 +12,7 @@ import {
     TOKEN_FLY_STC,
     ToHumanAmount,
     FLY_PRICE_USD,
+    TOKEN_FAI_FLY,
 } from "./index";
 import TxnWrapper, { JsonProvider } from "./TxnWrapper";
 import { iBondDetail, iStakeDetail } from "../store/slices/account-slice";
@@ -60,12 +61,14 @@ export const getUserBalancesForBondTrade = async (address: string) => {
         const faiResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FAI), { decode: true }]));
         const stcResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_STC), { decode: true }]));
         const flyFaiResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FLY_FAI), { decode: true }]));
+        const faiflyResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FAI_FLY), { decode: true }]));
         const flySTCResult = resultDesc(await requestChain("state.get_resource", [address, KEY_Balance(TOKEN_FLY_STC), { decode: true }]));
 
         return {
             fai: faiResult?.token?.value || 0,
             stc: stcResult?.token?.value || 0,
             "fly-fai lp": flyFaiResult?.token?.value || 0,
+            "fai-fly lp": faiflyResult?.token?.value || 0,
             "fly-stc lp": flySTCResult?.token?.value || 0,
         };
     } catch (e) {
@@ -79,7 +82,7 @@ export const getUserBalancesForBondTrade = async (address: string) => {
 // ========================================================
 export const getUserBondInfo = async (address: string, tokenAddress: string) => {
     try {
-        const bondInfo = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<${TOKEN_STC}>`, { decode: true }])) as iBondDetail;
+        const bondInfo = resultDesc(await requestChain("state.get_resource", [address, `${CONTRACT_ADDRESS}::Bond::Bond<${tokenAddress}>`, { decode: true }])) as iBondDetail;
         if (bondInfo) {
             const vestingPercent = await getUserBondVesting(address, tokenAddress);
             bondInfo["vesting_percent"] = vestingPercent;
@@ -123,7 +126,9 @@ export const getUserStakedAndBond = async (address: string) => {
             fai: await getUserBondInfo(address, TOKEN_FAI),
             "fly-stc lp": await getUserBondInfo(address, TOKEN_FLY_STC),
             "fly-fai lp": await getUserBondInfo(address, TOKEN_FLY_FAI),
+            "fai-fly lp": await getUserBondInfo(address, TOKEN_FAI_FLY),
         };
+
         // token balance in address wallet
         const bondTokenBalance = await getUserBalancesForBondTrade(address);
 
@@ -149,8 +154,9 @@ export interface iBondData {
     debtRatio: number;
     tokens?: string[];
     vesting_term?: number;
-    total_purchased?: number;
+    total_purchased: number;
     bond_price_usd?: number;
+    max_debt: number;
     roi: {
         (oracle_price_fly: number): BigNumber;
     };
@@ -160,8 +166,8 @@ export interface iBondData {
 }
 
 interface iRoiCalcuData {
-    bond_price_usd: string | BigNumber;
-    oracle_price_fly: string | BigNumber;
+    bond_price_usd: string | number | BigNumber;
+    oracle_price_fly: string | number | BigNumber;
 }
 
 export const ROICalcu = ({ bond_price_usd, oracle_price_fly }: iRoiCalcuData) => {
@@ -187,7 +193,7 @@ export const getBondList = async () => {
 
                     const [bond_price_usd_big] = (await getBondPriceUSD(tokenAddress)) || [];
                     // bond_price needs shiftedBy
-                    const bond_price_usd = new BigNumber(bond_price_usd_big).shiftedBy(-18).dp(2).toString();
+                    const bond_price_usd = new BigNumber(bond_price_usd_big).shiftedBy(-18).toNumber();
                     // Bond Info
                     const { total_debt, total_purchased, last_update_time } = (await getBondInfo(tokenAddress)) as iBondInfo;
 
@@ -308,7 +314,7 @@ export const buyBondService = async ({ tokenAddress, amount, bond_price_usd = 10
     return TxnWrapper({
         functionId: `${CONTRACT_ADDRESS}::MarketScript::buy_bond`,
         typeTag: [tokenAddress],
-        params: [ToChainAmount(amount, precision), bond_price_usd],
+        params: [ToChainAmount(amount, precision).toNumber(), bond_price_usd],
     });
 };
 

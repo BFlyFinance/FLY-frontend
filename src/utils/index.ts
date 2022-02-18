@@ -47,8 +47,9 @@ export const FLY_PRICE_USD = `${CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
 export const TOKEN_FAI = `0xfe125d419811297dfab03c61efec0bc9::FAI::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;
-export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
-export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_STC}, ${TOKEN_FLY}>`;
+export const TOKEN_FAI_FLY = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
+export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_FAI}>`;
+export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_STC}>`;
 
 export const chainRpc = () => `https://${CHAIN_NAME[251]}-seed.starcoin.org/`;
 

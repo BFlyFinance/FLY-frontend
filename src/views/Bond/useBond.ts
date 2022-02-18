@@ -7,6 +7,7 @@ import { iReduxState } from "../../store/slices/state.interface";
 import { iAppSlice } from "../../store/slices/app-slice";
 import { getAccountStakedAndBond, iAccountSlice } from "../../store/slices/account-slice";
 import { ToHumanAmount } from "../../utils";
+import BigNumber from "bignumber.js";
 
 export default () => {
     const dispatch = useDispatch();
@@ -24,19 +25,28 @@ export default () => {
     useEffect(() => {
         // update current balance user has
         setCurrentTokenBalance(
-            ToHumanAmount(account.bondTokenBalance[dialogData?.name?.toLowerCase()] || 0, appInfo?.tokenPrecision[dialogData?.name?.toLowerCase()]?.scale).toString(),
+            ToHumanAmount(account.bondTokenBalance[dialogData?.name?.toLowerCase()] || 0, appInfo?.tokenPrecision[dialogData?.name?.toLowerCase()]?.scale).toString(10),
         );
         // update ratio
-        setBondDebtRatio(`${ToHumanAmount(dialogData.debtRatio, Math.pow(10, 18)).multipliedBy(100).dp(4).toString()}%`);
+        setBondDebtRatio(`${ToHumanAmount(dialogData.debtRatio, Math.pow(10, 18)).multipliedBy(100).dp(4).toString(10)}%`);
     }, [dialogData, account, appInfo]);
 
     const buyBond = async ({ tokenAddress, bond_price_usd = 0, name }: iBondDialogData) => {
         try {
             if (bondAmount !== 0 && bondAmount !== "") {
+                if (bondAmount > currentTokenBalance) {
+                    return enqueueSnackbar("Buy amount can not over your balance!", { variant: "error" });
+                }
+
                 setBondLoading(true);
                 const tokenName = name.toLocaleLowerCase();
 
-                const txn = await buyBondService({ tokenAddress, precision: appInfo.tokenPrecision[tokenName]?.scale, amount: Number(bondAmount), bond_price_usd });
+                const txn = await buyBondService({
+                    tokenAddress,
+                    precision: appInfo.tokenPrecision[tokenName]?.scale,
+                    amount: Number(bondAmount),
+                    bond_price_usd: new BigNumber(bond_price_usd).shiftedBy(18).toNumber(),
+                });
                 const currentTxnStatus = await GetTransactionStatus(txn);
 
                 if (currentTxnStatus?.status === "Executed") {

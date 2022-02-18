@@ -100,7 +100,6 @@ const accountSlice = createSlice({
             })
             .addCase(getAccountStakedAndBond.fulfilled, (state, actions) => {
                 state.loading = false;
-                console.log(actions.payload);
                 Object.assign(state, actions.payload as {});
             });
     },

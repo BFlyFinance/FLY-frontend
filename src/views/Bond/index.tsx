@@ -55,7 +55,8 @@ export default () => {
     const updateBondList = useCallback(async () => {
         setLoading(true);
         try {
-            setBondList((await getBondList()) as iBondData[]);
+            // filter bond
+            setBondList(((await getBondList()) as iBondData[]).filter(bond => bond.total_purchased < bond.max_debt));
             setLoading(false);
         } catch (e: any) {
             enqueueSnackbar(e.toString(), { variant: "error" });
@@ -64,6 +65,7 @@ export default () => {
 
     const buyBondAndUpdateBondList = useCallback(
         async (dialogData: iBondDialogData) => {
+            // console.log(dialogData);
             await buyBond(dialogData);
             await updateBondList();
         },
