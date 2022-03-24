@@ -3,7 +3,7 @@ import {
     KEY_Balance,
     TOKEN_FLY,
     ToChainAmount,
-    chainRpc,
+    CHAIN_RPC_BASE,
     requestChain,
     resultDesc,
     TOKEN_FAI,
@@ -19,7 +19,7 @@ import { iBondDetail, iStakeDetail } from "../store/slices/account-slice";
 import BigNumber from "bignumber.js";
 
 export const GetTransactionStatus = (txHash: string) => {
-    return JsonProvider(chainRpc()).getTransactionInfo(txHash);
+    return JsonProvider(CHAIN_RPC_BASE()).getTransactionInfo(txHash);
 };
 
 // ========================================================

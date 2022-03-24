@@ -56,7 +56,7 @@ export default () => {
         setLoading(true);
         try {
             // filter bond
-            setBondList(((await getBondList()) as iBondData[]).filter(bond => bond.total_purchased < bond.max_debt));
+            setBondList(((await getBondList()) as iBondData[]).filter(bond => bond.total_purchased < bond.max_debt && !isNaN(Number(bond.bond_price_usd))));
             setLoading(false);
         } catch (e: any) {
             enqueueSnackbar(e.toString(), { variant: "error" });

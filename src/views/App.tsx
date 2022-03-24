@@ -51,7 +51,9 @@ function App() {
         const init = async () => {
             const result = await getMarketIndex();
             // dispatch MarketIndex
-            dispatch(setMarketIndex(result[0]));
+            if (Array.isArray(result) && result.length > 0) {
+                dispatch(setMarketIndex(result[0]));
+            }
         };
 
         init();

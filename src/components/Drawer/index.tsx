@@ -10,6 +10,7 @@ import { Drawer, Link } from "@mui/material";
 import BondIcon from "../../assets/icons/bond.svg";
 import StakeIcon from "../../assets/icons/stake.svg";
 import Social from "./social";
+import { NETWORK_NAME } from "../../utils";
 
 interface INavDrawer {
     mobileOpen: boolean;
@@ -35,7 +36,10 @@ export default ({ mobileOpen, isSmallerScreen, handleDrawerToggle }: INavDrawer)
             }}
         >
             <div className="drawer">
-                <div className="logo">FLY Defi</div>
+                <div className="logo">
+                    FLY Defi
+                    <span className="network tag">{NETWORK_NAME().toUpperCase()}</span>
+                </div>
                 <div className="dapp-nav">
                     <Link component={NavLink} to="/stake" className={classNames("button-dapp-menu", { active: isActive })}>
                         <div className="dapp-menu-item">

@@ -8,6 +8,18 @@
 .logo {
     font-size: 26px;
     margin: 50px auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    .network {
+        font-size: 10px;
+        margin-left: 0px;
+        color: #ddd;
+        border-radius: 5px;
+        padding: 3px 5px;
+        transform: scale(0.9);
+    }
 }
 
 $drawer-width: 280px;

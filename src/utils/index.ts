@@ -41,20 +41,21 @@ export enum CHAIN_NAME {
     proxima = 252,
 }
 
-export const CONTRACT_ADDRESS = "0xA4c60527238c2893deAF3061B759c11E".toLowerCase();
+export const CONTRACT_ADDRESS = "0x2EBeC5522d28E621C782c876b7787A6D".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
 export const FLY_PRICE_USD = `${CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
-export const TOKEN_FAI = `0xfe125d419811297dfab03c61efec0bc9::FAI::FAI`;
+export const TOKEN_FAI = `0x4ffcc98f43ce74668264a0cf6eebe42b::FAI::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;
 export const TOKEN_FAI_FLY = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_FAI}>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_STC}>`;
 
-export const chainRpc = () => `https://${CHAIN_NAME[251]}-seed.starcoin.org/`;
+export const NETWORK_NAME = () => CHAIN_NAME[window.starcoin?.networkVersion || 1];
+export const CHAIN_RPC_BASE = () => `https://${NETWORK_NAME()}-seed.starcoin.org/`;
 
 export const requestChain = async (method: string, params: any) =>
-    await axios.post(chainRpc(), {
+    await axios.post(CHAIN_RPC_BASE(), {
         id: 1,
         jsonrpc: "2.0",
         method,

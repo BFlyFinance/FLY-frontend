@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 
-import { requestChain, TOKEN_FLY, CHAIN_NAME, TOKEN_FAI, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC } from "../../utils/index";
+import { requestChain, TOKEN_FLY, CHAIN_NAME, TOKEN_FAI, TOKEN_FLY_FAI, TOKEN_FLY_STC, TOKEN_STC, NETWORK_NAME } from "../../utils/index";
 import { RootState } from "../index";
 import { getBondDebtRatio, getFlyPrice } from "../../utils/service";
 
@@ -52,7 +52,7 @@ const initialState: iAppSlice = {
 
 export const getOracle = createAsyncThunk("app/getOracle", async () => {
     try {
-        const res = await axios.get(`https://price-api.starcoin.org/${CHAIN_NAME[251]}/v1/priceFeeds`);
+        const res = await axios.get(`https://price-api.starcoin.org/${NETWORK_NAME()}/v1/priceFeeds`);
         const result: TokenPrice = {};
 
         res.data
