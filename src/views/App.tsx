@@ -44,6 +44,8 @@ function App() {
             window.location.reload();
         });
 
+        console.log("in app load", window.starcoin);
+
         // Get Token Price
         dispatch(getOracle());
         dispatch(getTokenPrecision());
@@ -63,26 +65,22 @@ function App() {
         };
     }, []);
 
-    return (
-        <div>
-            {appInfo.loading ? (
-                <Loader></Loader>
-            ) : (
-                <div className="App">
-                    <Drawer mobileOpen={mobileOpen} isSmallerScreen={isSmallerScreen} handleDrawerToggle={handleDrawerToggle}></Drawer>
-                    <div className="main">
-                        <Header handleDrawerToggle={handleDrawerToggle} drawe={!isSmallerScreen}></Header>
-                        <div className={`content ${isSmallerScreen && "content-shift"}`}>
-                            <Routes>
-                                <Route path="/" element={<Navigate to="/stake" />}></Route>
-                                <Route path="/stake" element={<Stake />}></Route>
-                                <Route path="/bond" element={<Bond />}></Route>
-                                <Route path="*" element={<Navigate to="/" />}></Route>
-                            </Routes>
-                        </div>
-                    </div>
+    return appInfo.loading ? (
+        <Loader></Loader>
+    ) : (
+        <div className="App">
+            <Drawer mobileOpen={mobileOpen} isSmallerScreen={isSmallerScreen} handleDrawerToggle={handleDrawerToggle}></Drawer>
+            <div className="main">
+                <Header handleDrawerToggle={handleDrawerToggle} drawe={!isSmallerScreen}></Header>
+                <div className={`content ${isSmallerScreen && "content-shift"}`}>
+                    <Routes>
+                        <Route path="/" element={<Navigate to="/stake" />}></Route>
+                        <Route path="/stake" element={<Stake />}></Route>
+                        <Route path="/bond" element={<Bond />}></Route>
+                        <Route path="*" element={<Navigate to="/" />}></Route>
+                    </Routes>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

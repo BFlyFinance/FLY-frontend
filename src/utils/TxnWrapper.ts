@@ -13,7 +13,7 @@ enum PROVIDER_URL_MAP {
 
 if (window.starcoin) {
     starcoinProvider = new providers.Web3Provider(window.starcoin, "any");
-    jsonProvider = (url: string) => new providers.JsonRpcProvider(url || PROVIDER_URL_MAP[251]);
+    jsonProvider = (url: string) => new providers.JsonRpcProvider(url || PROVIDER_URL_MAP[window.starcoin?.networkVersion || 1]);
 } else {
     console.error("[TxnWrapper] Has no window.starcoin! Maybe Install the starmask!");
 }

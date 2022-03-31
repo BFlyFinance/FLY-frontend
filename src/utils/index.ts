@@ -51,6 +51,7 @@ export const TOKEN_FAI_FLY = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToke
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_FAI}>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_STC}>`;
 
+console.log("in utils", window.starcoin);
 export const NETWORK_NAME = () => CHAIN_NAME[window.starcoin?.networkVersion || 1];
 export const CHAIN_RPC_BASE = () => `https://${NETWORK_NAME()}-seed.starcoin.org/`;
 
