@@ -44,10 +44,6 @@ function App() {
             window.location.reload();
         });
 
-        // Get Token Price
-        dispatch(getOracle());
-        dispatch(getTokenPrecision());
-
         const init = async () => {
             const result = await getMarketIndex();
             // dispatch MarketIndex
@@ -56,7 +52,12 @@ function App() {
             }
         };
 
-        init();
+        // Get Token Price
+        setTimeout(() => {
+            dispatch(getOracle());
+            dispatch(getTokenPrecision());
+            init();
+        }, 100);
 
         return () => {
             window.starcoin.removeAllListeners();

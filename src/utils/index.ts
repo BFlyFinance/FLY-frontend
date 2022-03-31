@@ -55,7 +55,6 @@ export const NETWORK_NAME = () => CHAIN_NAME[window.starcoin?.networkVersion || 
 export const CHAIN_RPC_BASE = () => `https://${NETWORK_NAME()}-seed.starcoin.org/`;
 
 export const requestChain = async (method: string, params: any) => {
-    console.log(method, params, CHAIN_RPC_BASE());
     return await axios.post(CHAIN_RPC_BASE(), {
         id: 1,
         jsonrpc: "2.0",
