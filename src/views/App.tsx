@@ -44,8 +44,6 @@ function App() {
             window.location.reload();
         });
 
-        console.log("in app load", window.starcoin);
-
         // Get Token Price
         dispatch(getOracle());
         dispatch(getTokenPrecision());

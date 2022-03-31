@@ -51,17 +51,18 @@ export const TOKEN_FAI_FLY = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToke
 export const TOKEN_FLY_FAI = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_FAI}>`;
 export const TOKEN_FLY_STC = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FLY}, ${TOKEN_STC}>`;
 
-console.log("in utils", window.starcoin);
 export const NETWORK_NAME = () => CHAIN_NAME[window.starcoin?.networkVersion || 1];
 export const CHAIN_RPC_BASE = () => `https://${NETWORK_NAME()}-seed.starcoin.org/`;
 
-export const requestChain = async (method: string, params: any) =>
-    await axios.post(CHAIN_RPC_BASE(), {
+export const requestChain = async (method: string, params: any) => {
+    console.log(method, params, CHAIN_RPC_BASE());
+    return await axios.post(CHAIN_RPC_BASE(), {
         id: 1,
         jsonrpc: "2.0",
         method,
         params,
     });
+};
 
 export const resultDesc = (result: any) => {
     return result?.data?.result?.json || {};
