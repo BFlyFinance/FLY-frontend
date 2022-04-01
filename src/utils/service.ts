@@ -13,6 +13,7 @@ import {
     ToHumanAmount,
     FLY_PRICE_USD,
     TOKEN_FAI_FLY,
+    ORACLE_CONTRACT_ADDRESS,
 } from "./index";
 import TxnWrapper, { JsonProvider } from "./TxnWrapper";
 import { iBondDetail, iStakeDetail } from "../store/slices/account-slice";
@@ -155,7 +156,7 @@ export interface iBondData {
     tokens?: string[];
     vesting_term?: number;
     total_purchased: number;
-    bond_price_usd?: number;
+    bond_price_usd: number | BigNumber;
     max_debt: number;
     roi: {
         (oracle_price_fly: number): BigNumber;
@@ -166,13 +167,13 @@ export interface iBondData {
 }
 
 interface iRoiCalcuData {
-    bond_price_usd: string | number | BigNumber;
+    bond_price_usd_big: string | number | BigNumber;
     oracle_price_fly: string | number | BigNumber;
 }
 
-export const ROICalcu = ({ bond_price_usd, oracle_price_fly }: iRoiCalcuData) => {
+export const ROICalcu = ({ bond_price_usd_big, oracle_price_fly }: iRoiCalcuData) => {
     // (1 - bond_price / oracle_price<FLY>) * 100  (%)
-    return new BigNumber(1).minus(new BigNumber(bond_price_usd).div(oracle_price_fly)).times(100);
+    return new BigNumber(1).minus(new BigNumber(bond_price_usd_big).div(oracle_price_fly)).times(100);
 };
 
 export const getBondList = async () => {
@@ -192,8 +193,10 @@ export const getBondList = async () => {
                     }
 
                     const [bond_price_usd_big] = (await getBondPriceUSD(tokenAddress)) || [];
+
                     // bond_price needs shiftedBy
-                    const bond_price_usd = new BigNumber(bond_price_usd_big).shiftedBy(-18).toNumber();
+                    const bond_price_usd = new BigNumber(bond_price_usd_big).shiftedBy(-18) || 0;
+
                     // Bond Info
                     const { total_debt, total_purchased, last_update_time } = (await getBondInfo(tokenAddress)) as iBondInfo;
 
@@ -221,11 +224,7 @@ export const getBondList = async () => {
                             bond_price_usd,
                             debtRatio,
                             name: `${tokenNames.join("-")}${tokens.length > 1 ? " LP" : ""}`,
-                            roi: (oracle_price_fly: number) =>
-                                ROICalcu({
-                                    bond_price_usd,
-                                    oracle_price_fly: new BigNumber(oracle_price_fly),
-                                } as iRoiCalcuData),
+                            // TODO: move out
                             purchased: (oracle_price_lp: number) => {
                                 return new BigNumber(total_purchased).times(bond_price_usd || 0);
                             },
@@ -248,7 +247,7 @@ export const getBondList = async () => {
 // ========================================================
 export const getFlyPrice = async () => {
     try {
-        const result = await requestChain("contract.call_v2", [{ function_id: "0x1::PriceOracle::read", args: [CONTRACT_ADDRESS], type_args: [FLY_PRICE_USD] }]);
+        const result = await requestChain("contract.call_v2", [{ function_id: "0x1::PriceOracle::read", args: [ORACLE_CONTRACT_ADDRESS], type_args: [FLY_PRICE_USD] }]);
         return result.data?.result ? result.data?.result[0] || 0 : 0;
     } catch (e) {
         console.log(e);
@@ -306,7 +305,7 @@ export const getBondPriceUSD = async (tokenAddress: string) => {
 export interface iBondBuyData {
     tokenAddress: string;
     amount: number;
-    bond_price_usd: number;
+    bond_price_usd: number | BigNumber;
     precision: number;
 }
 

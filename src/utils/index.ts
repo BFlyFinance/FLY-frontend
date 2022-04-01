@@ -28,7 +28,7 @@ export const prettifySeconds = (seconds?: number, resolution?: string) => {
 };
 
 interface ROIParams {
-    [key: string]: number;
+    [key: string]: number | BigNumber;
 }
 
 export const ROI = ({ bondPrice, tokenPrice }: ROIParams) => {
@@ -43,7 +43,8 @@ export enum CHAIN_NAME {
 
 export const CONTRACT_ADDRESS = "0x2EBeC5522d28E621C782c876b7787A6D".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
-export const FLY_PRICE_USD = `${CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
+export const ORACLE_CONTRACT_ADDRESS = "0xA4c60527238c2893deAF3061B759c11E".toLocaleLowerCase();
+export const FLY_PRICE_USD = `${ORACLE_CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
 export const TOKEN_FAI = `0x4ffcc98f43ce74668264a0cf6eebe42b::FAI::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;

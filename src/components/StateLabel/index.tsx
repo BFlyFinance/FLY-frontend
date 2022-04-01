@@ -2,7 +2,7 @@ import "./index.scss";
 
 export interface IStateLabelProps {
     title: string;
-    value: string | number;
+    value?: string | number | null;
 }
 
 const Statelabel = (props: IStateLabelProps) => {

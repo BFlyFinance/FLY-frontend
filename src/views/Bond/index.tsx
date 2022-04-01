@@ -18,6 +18,7 @@ import useBond from "./useBond";
 import { useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 import { iAppSlice } from "../../store/slices/app-slice";
+import BigNumber from "bignumber.js";
 
 enum eBondTab {
     bond = "bond",
@@ -125,6 +126,7 @@ export default () => {
                         <Statelabel title={"FLY Price"} value={`$${appInfo.tokenPrice["FLY"]}`}></Statelabel>
                     </Grid>
                 </Grid>
+
                 {/* Table */}
                 {loading ? (
                     <Loader />
@@ -136,19 +138,8 @@ export default () => {
                                     <Card className="bond-card" key={index}>
                                         <CardContent>
                                             <Statelabel title={"Bond"} value={row.name}></Statelabel>
-                                            <Statelabel
-                                                title={"Price"}
-                                                value={ToHumanAmount(row.bond_price_usd as number, Math.pow(10, 18))
-                                                    .dp(4)
-                                                    .toNumber()}
-                                            ></Statelabel>
-                                            <Statelabel
-                                                title={"ROI"}
-                                                value={`${row
-                                                    .roi(1 * Math.pow(10, 18))
-                                                    .dp(4)
-                                                    .toNumber()}%`}
-                                            ></Statelabel>
+                                            <Statelabel title={"Price"} value={`$${new BigNumber(row.bond_price_usd).dp(4).toString()}`}></Statelabel>
+                                            <Statelabel title={"ROI"} value={ROI({ bondPrice: row.bond_price_usd, tokenPrice: Number(appInfo.tokenPrice["FLY"]) })}></Statelabel>
                                             <Statelabel title={"Purchased"} value={`$${row.purchased(Number(appInfo.tokenPrice["FLY"])).dp(2).toNumber()}`}></Statelabel>
                                             <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
                                                 Bond
@@ -173,18 +164,8 @@ export default () => {
                                         {bondList.map((row, index) => (
                                             <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                                                 <TableCell>{row.name}</TableCell>
-                                                <TableCell>
-                                                    {ToHumanAmount(row.bond_price_usd as number, Math.pow(10, 18))
-                                                        .dp(4)
-                                                        .toNumber()}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {row
-                                                        .roi(1 * Math.pow(10, 18))
-                                                        .dp(4)
-                                                        .toNumber()}
-                                                    %
-                                                </TableCell>
+                                                <TableCell>{`$${new BigNumber(row.bond_price_usd).dp(4).toString()}`}</TableCell>
+                                                <TableCell>{ROI({ bondPrice: row.bond_price_usd, tokenPrice: Number(appInfo.tokenPrice["FLY"]) })}</TableCell>
                                                 <TableCell>{`$${row.purchased(Number(appInfo.tokenPrice["FLY"])).dp(2).toNumber()}`}</TableCell>
                                                 <TableCell>
                                                     <LoadingButton sx={CustomButtonSmall} variant="contained" onClick={() => openDialogHandler(row)}>
@@ -248,10 +229,10 @@ export default () => {
 
                     <div className="dialog-data">
                         <DataRow title="Your Balance" value={currentTokenBalance}></DataRow>
-                        {/* Basc on inputNumber * current token price / bond price */}
+                        {/* TODO: Basc on inputNumber * current token price / bond price */}
                         <DataRow title="You will Get" value="0"></DataRow>
                         {/* ROI = (1 - bond_price / oracle_price<FLY>) * 100  (%) */}
-                        <DataRow title="ROI" value={ROI({ tokenPrice: 1, bondPrice: 1 })}></DataRow>
+                        <DataRow title="ROI" value={ROI({ bondPrice: dialogData.bond_price_usd, tokenPrice: Number(appInfo.tokenPrice["FLY"]) })}></DataRow>
                         <DataRow title="Debt Ratio" value={bondDebtRatio}></DataRow>
                         <DataRow title="Vesting Term" value={prettifySeconds(dialogData.vesting_term)}></DataRow>
                     </div>
