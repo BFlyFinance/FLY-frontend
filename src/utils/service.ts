@@ -212,21 +212,23 @@ export const getBondList = async () => {
                             .map(token => token.trim());
                         const tokenNames = tokens.map(token => token.split("::").pop());
 
-                        // ROI = (1 - bond_price / oracle_price<FLY>) * 100  (%)
-                        // purchased = total_purchased * oracle_price<token_type>
+                        const total_debt_ui = new BigNumber(total_debt).shiftedBy(-9).toNumber();
+                        const total_purchased_ui = new BigNumber(total_purchased).shiftedBy(-9).toNumber();
 
                         return {
                             tokens,
                             tokenAddress,
                             total_debt,
+                            total_debt_ui,
                             total_purchased,
+                            total_purchased_ui,
                             last_update_time,
                             bond_price_usd,
                             debtRatio,
                             name: `${tokenNames.join("-")}${tokens.length > 1 ? " LP" : ""}`,
                             // TODO: move out
                             purchased: (oracle_price_lp: number) => {
-                                return new BigNumber(total_purchased).times(bond_price_usd || 0);
+                                return new BigNumber(total_purchased_ui).times(bond_price_usd || 0);
                             },
                             ...payload,
                         };

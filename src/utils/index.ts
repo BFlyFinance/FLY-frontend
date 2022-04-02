@@ -32,7 +32,7 @@ interface ROIParams {
 }
 
 export const ROI = ({ bondPrice, tokenPrice }: ROIParams) => {
-    return new BigNumber(1).minus(new BigNumber(bondPrice).dividedBy(tokenPrice)).multipliedBy(100).valueOf() + "%";
+    return new BigNumber(1).minus(new BigNumber(bondPrice).dividedBy(tokenPrice)).multipliedBy(100).dp(4).valueOf() + "%";
 };
 
 export enum CHAIN_NAME {
