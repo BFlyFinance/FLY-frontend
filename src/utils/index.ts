@@ -41,11 +41,11 @@ export enum CHAIN_NAME {
     proxima = 252,
 }
 
-export const CONTRACT_ADDRESS = "0x2EBeC5522d28E621C782c876b7787A6D".toLowerCase();
+export const CONTRACT_ADDRESS = "0x04E82d369d8DC20f9E4D3EF42828c5A2".toLowerCase();
 export const SWAP_CONTRACT_ADDRESS = "0x4783d08fb16990bd35d83f3e23bf93b8".toLocaleLowerCase();
 export const ORACLE_CONTRACT_ADDRESS = "0xA4c60527238c2893deAF3061B759c11E".toLocaleLowerCase();
 export const FLY_PRICE_USD = `${ORACLE_CONTRACT_ADDRESS}::FLYOracle::FLY_USD`;
-export const TOKEN_FAI = `0x4ffcc98f43ce74668264a0cf6eebe42b::FAI::FAI`;
+export const TOKEN_FAI = `0xFE125d419811297dfAB03c61EfEC0bC9::FAI::FAI`;
 export const TOKEN_FLY = `${CONTRACT_ADDRESS}::FLY::FLY`;
 export const TOKEN_STC = `0x1::STC::STC`;
 export const TOKEN_FAI_FLY = `${SWAP_CONTRACT_ADDRESS}::TokenSwap::LiquidityToken<${TOKEN_FAI}, ${TOKEN_FLY}>`;
